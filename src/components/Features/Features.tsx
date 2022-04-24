@@ -85,6 +85,7 @@ const StyledTitle = styled.h1`
     font-size: 4rem;
     font-family: 'MainFont';
     color: white;
+    
 `;
 
 const StyledImage = styled.img`
