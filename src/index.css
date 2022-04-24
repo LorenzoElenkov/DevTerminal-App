@@ -1,13 +1,27 @@
-body {
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  outline: 0;
+  box-sizing: border-box;
+  font-size: 62.5%;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+#root {
+  margin: 0 auto;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, minmax(100vh, max-content));
+}
+
+@font-face {
+  font-family: 'MainFont';
+  src: url('../src/components/fonts/made_tommy/MADE\ TOMMY\ Medium_PERSONAL\ USE.otf');
+}
+
+@font-face {
+  font-family: 'LightFont';
+  src: url('../src/components//fonts/made_tommy/MADE\ TOMMY\ Light_PERSONAL\ USE.otf');
 }
