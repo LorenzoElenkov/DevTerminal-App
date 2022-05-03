@@ -11,7 +11,7 @@ const LandingPage: React.FC = () => {
             <StyledMainTitle><span>The platform</span> where developers come together to create amazing things</StyledMainTitle>
             <StyledMainSubtitle>Connecting with hundreds of other developers is easier now with DevTerminal.<br />Browse projects of other developers or create one yourself - get help for bigger and more complex projects.</StyledMainSubtitle>
             <StyledMainButton>Get started</StyledMainButton>
-            <StyledHowButton>How it works?</StyledHowButton>
+            <StyledHowButton>Learn more</StyledHowButton>
         </StyledMainText>
     </StyledContainer>
   )

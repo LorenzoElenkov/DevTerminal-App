@@ -13,7 +13,7 @@
 main {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(4, minmax(100vh, max-content));
+  grid-template-rows: calc(100vh - 48px) repeat(4, minmax(100vh, max-content));
 }
 
 @font-face {
@@ -24,4 +24,9 @@ main {
 @font-face {
   font-family: 'LightFont';
   src: url('../src/components//fonts/made_tommy/MADE\ TOMMY\ Light_PERSONAL\ USE.otf');
+}
+
+@font-face {
+  font-family: 'RegularFont';
+  src: url('../src/components//fonts/made_tommy/MADE\ TOMMY\ Regular_PERSONAL\ USE.otf');
 }

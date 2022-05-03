@@ -97,7 +97,7 @@ const StyledContainer = styled.section`
 
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: max-content max-content 1fr;
+    grid-template-rows: max-content max-content 1fr 100px;
 `;
 
 const StyledTitle = styled.h1`
@@ -205,7 +205,7 @@ const StyledPricingBoxContainer = styled.div`
 
 const StyledPricingBox = styled.div`
     font-family: 'LightFont';
-    padding: 20px 40px;
+    padding: 20px 40px 70px 40px;
     border: 1px solid black;
     border-radius: 25px;
 

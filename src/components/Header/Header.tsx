@@ -1,29 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import styled, { keyframes } from 'styled-components';
 
 import searchIcon from '../images/searchIcon.png';
 
-const Header: React.FC = () => {
+const Header: React.FC<IProps> = ({abc}: IProps) => {
+  const [loginOrSignup, setLoginOrSignup] = useState('');
+
+  const handle = (menu: string) => {
+    abc(menu);
+  };
+
+    
   return (
     <StyledNav className='nav'>
         <StyledLogo column='2'>DevTerminal</StyledLogo>
         <StyledButton column='3'>Home</StyledButton>
         <StyledButton column='4'>Features</StyledButton>
         <StyledButton column='5'>Pricing</StyledButton>
-        <StyledButton column='6'>Testimonials</StyledButton>
-        <StyledSearchBar column='8'>
+        <StyledButton column='6'>F.A.Q.</StyledButton>
+        {/* <StyledSearchBar column='8'>
             <label htmlFor='search'/>
             <input id='search' type='text' autoComplete='false' placeholder='Search projects...'/>
-        </StyledSearchBar>
-        <StyledButton column='9'>Sign in</StyledButton>
-        <StyledButton column='10'>Sign up</StyledButton>
+        </StyledSearchBar> */}
+        <StyledButton column='9' onClick={() => handle('login')}>Login</StyledButton>
+        <StyledButton column='10' onClick={() => handle('signup')}>Sign up</StyledButton>
     </StyledNav>
   )
 }
 
 export default Header;
 
+
+interface IProps {
+    abc(menu: string): void;
+}
 
 interface IButtonProps {
     className?: string;
@@ -41,11 +52,11 @@ interface ILogo {
 }
 
 const StyledNav = styled.nav`
-    position: absolute;
+    /* position: absolute;
     top: 0;
-    left: 0;
+    left: 0; */
     width: 100%;
-    height: max-content;
+    height: 48px;
     display: grid;
     grid-template-columns: 50px max-content repeat(4, max-content) 1fr repeat(3, max-content) 50px;
     grid-template-rows: max-content;
