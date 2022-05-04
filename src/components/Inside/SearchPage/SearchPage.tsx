@@ -1,10 +1,61 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import avatar from '../../images/avatar.png';
 import searchIcon from '../../images/searchIcon.png';
+import applicantsIcon from '../../images/applicants.png';
+import authorAvatar from '../../images/authorAvatar.png';
+
+import Select from 'react-select';
+
+const options = [
+    {value: 'newest', label: 'Newest'},
+    {value: 'oldest', label: 'Oldest'}
+];
+
+const customStyles = {
+    menu: (provided: any, state: any) => ({
+        ...provided,
+        // width: state.width,
+        left: '10px',
+    }),
+    option: (provided: any, state: any) => ({
+        ...provided,
+        fontSize: '1.2rem',
+        padding: '5px 0px 5px 5px',
+    }),
+    control: (provided: any, state: any) => ({
+        ...provided,
+        borderRadius: '15px',
+        marginLeft: '10px',
+        fontSize: '3rem',
+        border: '1px solid gray',
+    }),
+};
+
+
 
 const SearchPage = () => {
+    const isOverflow = (element: Element) => {
+        return element.scrollHeight > element.clientHeight;
+    };
+    
+
+    useEffect(() => {
+        const container = document.querySelectorAll(".timezoneContainer");
+        console.log(123);
+        container.forEach((parent) => {
+            if(isOverflow(parent)) {
+                parent.lastElementChild?.classList.add("btn-show");
+                parent.lastElementChild?.addEventListener('click', (e: any) => {
+                    e.target.parentElement.classList.add("showAll");
+                    parent.lastElementChild?.classList.remove("btn-show");
+                });
+            }
+        });
+    },[]);
+
+
   return (
     <StyledContainer>
        <StyledProfileContainer>
@@ -48,15 +99,158 @@ const SearchPage = () => {
                 </h3>
                 <label htmlFor='search'/>
                 <input type='search' id='search' placeholder='Front end dev, Back end dev, UI/UX Designer...'/>
-                <select>
-                    <option value='Newest'>Newest</option>
-                    <option value='Newest'>Oldest</option>
-                </select>
+                <Select options={options} styles={customStyles} defaultValue={options[0]} onChange={(e) => console.log(e?.label)}/>
             </StyledSearchField>
             <StyledSearchResultsContainer>
-                    <StyledSearchResult></StyledSearchResult>
-                    <StyledSearchResult></StyledSearchResult>
-                    <StyledSearchResult></StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aut impedit magnam placeat, pariatur soluta repudiens magni eaque accusantium saepe quam porro, aliquam, vero beatae qui ipsum odio vitae? Repellendus consequuntur, molestiae sequi mollitia labore in quae! Numquam ipsa possimus est odio vel necessitatibus dolore facilis optio, inventore veritatis, molestiae rem!</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                    <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
             </StyledSearchResultsContainer>
        </StyledSearchContainer>
        <StyledFilterContainer>
@@ -88,6 +282,35 @@ const SearchPage = () => {
                         <input type='checkbox' />
                         <span>
                             <span>Expert </span>
+                            <span>(57)</span>
+                            </span>
+                    </label>
+                </div>
+            </StyledFilterLevel>
+            <StyledFilterLevel>
+                <div>
+                    <h3>Tech Stack</h3>
+                    <button>Clear</button>
+                </div>
+                <div>
+                    <label>
+                        <input type='checkbox' />
+                        <span>
+                            <span>ReactJS</span> 
+                            <span>(201)</span>
+                        </span>
+                    </label>
+                    <label>
+                        <input type='checkbox' />
+                        <span>
+                            <span>React Native</span>
+                            <span>(125)</span>
+                        </span>
+                    </label>
+                    <label>
+                        <input type='checkbox' />
+                        <span>
+                            <span>Angular</span>
                             <span>(57)</span>
                             </span>
                     </label>
@@ -174,7 +397,7 @@ export default SearchPage;
 
 const StyledContainer = styled.div`
     height: max-content;
-    padding: 50px 0;
+    padding: 100px 0 50px 0;
     display: grid;
     grid-template-columns: 4% 1fr 3.5fr 1fr 4%;
     font-family: 'LightFont';
@@ -185,6 +408,7 @@ const StyledProfileContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 250px;
 `;
 
 const StyledProfileCard = styled.div`
@@ -196,7 +420,6 @@ const StyledProfileCard = styled.div`
     align-items: center;
     border-radius: 15px;
     gap: 5px;
-    width: max-content;
 
     img {
         width: 70px;
@@ -239,7 +462,6 @@ const StyledProfileExperience = styled.div`
     background: aliceblue;
     display: grid;
     gap: 20px;
-    width: max-content;
     h3 {
         font-size: 1.4rem;
         font-family: 'MainFont';
@@ -283,9 +505,9 @@ const StyledSearchField = styled.div`
     border-radius: 15px;
     padding: 20px;
     display: grid;
-    grid-template-columns: 80% 20%;
+    grid-template-columns: 75% 25%;
     row-gap: 10px;
-    width: 70%;
+    max-width: 600px;
     & > h3 {
         font-size: 1.6rem;
         font-family: 'MainFont';
@@ -315,12 +537,10 @@ const StyledSearchField = styled.div`
         border: 1px solid gray;
         font-family: 'LightFont';
     }
-    & > select {
-        font-size: 1.6rem;
+    & > .selectSearch {
+        font-size: 5rem;
         font-family: 'LightFont';
         margin-left: 10px;
-        border-radius: 15px;
-        padding: 7.5px;
     }
 `;
 
@@ -328,21 +548,160 @@ const StyledSearchResultsContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
+
+    @media screen and (min-width: 1500px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 20px;
+        column-gap: 10px;
+    }
 `;
 
 const StyledSearchResult = styled.div`
     background: aliceblue;
     border-radius: 15px;
     width: 100%;
-    height: 150px;
+    height: max-content;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    row-gap: 5px;
+    h3 {
+        font-size: 2rem;
+        font-family: 'RegularFont';
+        grid-column: 1/4;
+        letter-spacing: 0.5px;
+    }
+    h5 {
+        font-size: 1.2rem;
+        color: gray;
+        letter-spacing: 1px;
+        grid-column: 1/4;
+    }
+    .description {
+        margin-top: 15px;
+        font-size: 1.6rem;
+        letter-spacing: 0.3px;
+        color: gray;
+        grid-column: 1/4;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        @supports (-webkit-line-clamp: 2) {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: initial;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+    }
+    .timezoneContainer {
+        grid-column: 1/4;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        overflow: hidden;
+        max-height: 3.5rem;
+        position: relative;
+        margin-top: 15px;
+
+        &.showAll {
+            max-height: none;
+        }
+
+        .btn-expand {
+            display: none;
+            z-index: 1;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            padding: 7.5px 10px;
+            background-color: #6564db;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.4rem;
+            font-family: 'LightFont';
+        }
+
+        .btn-show {
+            display: block;
+        }
+
+        .timezoneBox {
+            font-size: 1.4rem;
+            padding: 7.5px 20px;
+            background: #ccd3da;
+            border-radius: 15px;
+        }
+        .yourZone {
+            background: #6564db;
+            color: white;
+        }
+    }
+    .divider {
+        margin-top: 15px;
+        grid-column: 1/4;
+        width: 100%;
+        border-bottom: 1px solid lightgray;
+    }
+    .author {
+        margin-top: 15px;
+        margin-right: 10px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 5px;
+        align-items: center;
+        img {
+            width: 40px;
+        }
+        .authorName {
+            font-size: 1.4rem;
+            font-family: 'RegularFont';
+        }
+    }
+    .applicants {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 10px;
+        align-items: center;
+        img {
+            width: 40px;
+        }
+        .applicantsNumber {
+            font-size: 2rem;
+            font-family: 'RegularFont';
+
+            span {
+                color: gray;
+            }
+        }
+    }
+    .applyButton {
+        margin-top: 15px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 15px;
+        background: tomato;
+        height: max-content;
+        width: max-content;
+        justify-self: end;
+        padding: 10px 30px;
+        color: white;
+        font-size: 1.6rem;
+        font-family: 'LightFont';
+    }
 `;
 
-//Add above styling for the results
 
 const StyledFilterContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 250px;
 `;
 
 const StyledFilterJob = styled.div`

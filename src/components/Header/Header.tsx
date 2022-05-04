@@ -52,9 +52,9 @@ interface ILogo {
 }
 
 const StyledNav = styled.nav`
-    /* position: absolute;
+    position: absolute;
     top: 0;
-    left: 0; */
+    left: 0;
     width: 100%;
     height: 48px;
     display: grid;
