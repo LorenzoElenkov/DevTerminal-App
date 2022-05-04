@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import avatar from '../../images/avatar.png';
@@ -36,23 +36,46 @@ const customStyles = {
 
 
 const SearchPage = () => {
-    const isOverflow = (element: Element) => {
+    const isOverflow = (element: any) => {
         return element.scrollHeight > element.clientHeight;
     };
-    
 
+    const [windowX, setWindowX] = useState<number | null>(null);
+    const [filtersAdded, setFiltersAdded] = useState<number>(0);
+    
     useEffect(() => {
-        const container = document.querySelectorAll(".timezoneContainer");
-        console.log(123);
-        container.forEach((parent) => {
-            if(isOverflow(parent)) {
-                parent.lastElementChild?.classList.add("btn-show");
-                parent.lastElementChild?.addEventListener('click', (e: any) => {
-                    e.target.parentElement.classList.add("showAll");
-                    parent.lastElementChild?.classList.remove("btn-show");
+        
+
+        let addRemoveTimeout: NodeJS.Timeout;
+
+        const addRemoveMoreBtn = (timer: number) => {
+            clearTimeout(addRemoveTimeout);
+            addRemoveTimeout = setTimeout(() => {
+                const container = document.querySelectorAll(".timezoneContainer");
+                container.forEach((parent) => {
+                    if(isOverflow(parent)) {
+                        parent.lastElementChild?.classList.add("btn-show");
+                        parent.lastElementChild?.addEventListener('click', (e: any) => {
+                            e.target.parentElement.classList.add("showAll");
+                            parent.lastElementChild?.classList.remove("btn-show");
+                        });
+                    } else {
+                        parent.lastElementChild?.classList.remove("btn-show");
+                    }
                 });
-            }
-        });
+                setWindowX(window.innerWidth);
+            }, timer);
+        }
+        
+        window.addEventListener('resize', () => {addRemoveMoreBtn(200)});
+        
+        if (!windowX) {
+            addRemoveMoreBtn(0);
+        }
+
+        return () => {
+            window.removeEventListener('resize', () => {addRemoveMoreBtn(200)});
+        }
     },[]);
 
 
@@ -103,43 +126,14 @@ const SearchPage = () => {
             </StyledSearchField>
             <StyledSearchResultsContainer>
                     <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate / Expert</h5>
                         <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
                         <div className='timezoneContainer'>
                             <span className='timezoneBox yourZone'>Your timezone</span>
                             <span className='timezoneBox'>+1h zone</span>
                             <span className='timezoneBox'>-1h zone</span>
                             <span className='timezoneBox'>+2h zone</span>
-                            <span className='timezoneBox'>-2h zone</span>
-                            <span className='timezoneBox'>+3h zone</span>
-                            <span className='timezoneBox'>-3h zone</span>
-                            <button className='btn-expand'>More...</button>
-
-                        </div>
-                        <span className='divider'></span>
-                        <div className='author'>
-                            <img src={authorAvatar} alt=''/>
-                            <span className='authorName'>Post Author</span>
-                        </div>
-                        <div className='applicants'>
-                            <img src={applicantsIcon} alt=''/>
-                            <span className='applicantsNumber'>0 <span>applicants</span></span>
-                        </div>
-                        <button className='applyButton'>View now</button>
-                    </StyledSearchResult>
-                    <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
-                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
-                        <div className='timezoneContainer'>
-                            <span className='timezoneBox yourZone'>Your timezone</span>
-                            <span className='timezoneBox'>+1h zone</span>
-                            <span className='timezoneBox'>-1h zone</span>
-                            <span className='timezoneBox'>+2h zone</span>
-                            <span className='timezoneBox'>-2h zone</span>
-                            <span className='timezoneBox'>+3h zone</span>
-                            <span className='timezoneBox'>-3h zone</span>
                             <button className='btn-expand'>More...</button>
                         </div>
                         <span className='divider'></span>
@@ -154,8 +148,33 @@ const SearchPage = () => {
                         <button className='applyButton'>View now</button>
                     </StyledSearchResult>
                     <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate</h5>
+                        <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
+                        <div className='timezoneContainer'>
+                            <span className='timezoneBox yourZone'>Your timezone</span>
+                            <span className='timezoneBox'>+1h zone</span>
+                            <span className='timezoneBox'>-1h zone</span>
+                            <span className='timezoneBox'>+2h zone</span>
+                            <span className='timezoneBox'>-2h zone</span>
+                            <span className='timezoneBox'>+3h zone</span>
+                            <span className='timezoneBox'>-3h zone</span>
+                            <button className='btn-expand'>More...</button>
+                        </div>
+                        <span className='divider'></span>
+                        <div className='author'>
+                            <img src={authorAvatar} alt=''/>
+                            <span className='authorName'>Post Author</span>
+                        </div>
+                        <div className='applicants'>
+                            <img src={applicantsIcon} alt=''/>
+                            <span className='applicantsNumber'>0 <span>applicants</span></span>
+                        </div>
+                        <button className='applyButton'>View now</button>
+                    </StyledSearchResult>
+                    <StyledSearchResult>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate</h5>
                         <span className='description'>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aut impedit magnam placeat, pariatur soluta repudiens magni eaque accusantium saepe quam porro, aliquam, vero beatae qui ipsum odio vitae? Repellendus consequuntur, molestiae sequi mollitia labore in quae! Numquam ipsa possimus est odio vel necessitatibus dolore facilis optio, inventore veritatis, molestiae rem!</span>
                         <div className='timezoneContainer'>
                             <span className='timezoneBox yourZone'>Your timezone</span>
@@ -177,8 +196,8 @@ const SearchPage = () => {
                         <button className='applyButton'>View now</button>
                     </StyledSearchResult>
                     <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate</h5>
                         <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
                         <div className='timezoneContainer'>
                             <span className='timezoneBox yourZone'>Your timezone</span>
@@ -202,8 +221,8 @@ const SearchPage = () => {
                         <button className='applyButton'>View now</button>
                     </StyledSearchResult>
                     <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate</h5>
                         <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
                         <div className='timezoneContainer'>
                             <span className='timezoneBox yourZone'>Your timezone</span>
@@ -227,8 +246,8 @@ const SearchPage = () => {
                         <button className='applyButton'>View now</button>
                     </StyledSearchResult>
                     <StyledSearchResult>
-                    <h3 className='role'>Junior UI/UX Designer</h3>
-                        <h5 className='expLevel'>Entry &#9679; Intermediate</h5>
+                        <h3 className='role'>Junior UI/UX Designer</h3>
+                        <h5 className='expLevel'>Entry / Intermediate</h5>
                         <span className='description'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, soluta.</span>
                         <div className='timezoneContainer'>
                             <span className='timezoneBox yourZone'>Your timezone</span>
@@ -255,7 +274,7 @@ const SearchPage = () => {
        </StyledSearchContainer>
        <StyledFilterContainer>
             <StyledFilterJob>
-                <h3>Filters (n)</h3>
+                <h3>Filters ({filtersAdded})</h3>
                 <button>Clear all</button>
             </StyledFilterJob>
             <StyledFilterLevel>
@@ -265,21 +284,33 @@ const SearchPage = () => {
                 </div>
                 <div>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>Entry </span> 
                             <span>(201)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>Intermediate </span>
                             <span>(125)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>Expert </span>
                             <span>(57)</span>
@@ -294,21 +325,33 @@ const SearchPage = () => {
                 </div>
                 <div>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>ReactJS</span> 
                             <span>(201)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>React Native</span>
                             <span>(125)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>Angular</span>
                             <span>(57)</span>
@@ -323,35 +366,55 @@ const SearchPage = () => {
                 </div>
                 <div>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>My timezone</span> 
                             <span>(15)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>+/- 1 hour </span> 
                             <span>(33)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>+/- 2 hours </span>
                             <span>(313)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>+/- 3 hours </span>
                             <span>(71)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>More than 3 hours </span>
                             <span>(37)</span>
@@ -366,21 +429,33 @@ const SearchPage = () => {
                 </div>
                 <div>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>Less than 5 </span> 
                             <span>(33)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>5 to 10 </span>
                             <span>(313)</span>
                         </span>
                     </label>
                     <label>
-                        <input type='checkbox' />
+                        <input type='checkbox' onChange={(e) => {if (e.target.checked) {
+                            setFiltersAdded(filtersAdded + 1);
+                        } else {
+                            setFiltersAdded(filtersAdded - 1);
+                        }}}/>
                         <span>
                             <span>More than 10 </span>
                             <span>(37)</span>
