@@ -3,7 +3,7 @@ import mainImg from '../images/mainimage2.png';
 
 import styled, { keyframes } from 'styled-components';
 
-const LandingPage: React.FC = () => {
+const LandingPage = () => {
   return (
     <StyledContainer>
         <StyledMainImage src={mainImg} alt=''/>
@@ -22,6 +22,8 @@ export default LandingPage;
 const StyledContainer = styled.section`
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-column: 1/6;
+    grid-row: 1/1;
 `;
 
 

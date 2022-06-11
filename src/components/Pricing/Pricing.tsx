@@ -98,6 +98,8 @@ const StyledContainer = styled.section`
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: max-content max-content 1fr 100px;
+    grid-column: 1/6;
+    grid-row: 3/3;
 `;
 
 const StyledTitle = styled.h1`

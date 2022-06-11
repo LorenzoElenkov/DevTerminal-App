@@ -65,6 +65,8 @@ export default Features;
 
 const StyledContainer = styled.section`
     display: grid;
+    grid-column: 1/6;
+    grid-row: 2/2;
     grid-template-columns: repeat(3, minmax(200px, 1fr));
     grid-template-rows: max-content 1fr 0.5fr;
     background: #6564DB;
