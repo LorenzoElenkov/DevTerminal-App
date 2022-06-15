@@ -11,8 +11,10 @@ export default React.createContext({
     avatarIcon: 0,
     avatarIconColor: '',
     avatarBackground: '',
-    login: (token, userId, nickname, email, bio, role, stacks, avatarIcon, avatarIconColor, avatarBackground, tokenExpiration) => {},
+    notifications: [],
+    login: (token, userId, nickname, email, bio, role, stacks, avatarIcon, avatarIconColor, avatarBackground, notifications, tokenExpiration) => {},
     logout: () => {},
     setNickname: (nickname) => {},
-    updateUser: (bio, role, stacks, nickname, avatarIcon, avatarIconColor, avatarBackground) => {},
+    updateUser: (bio, role, stacks, nickname, avatarIcon, avatarIconColor, avatarBackground, notifications) => {},
+    updateNotifications: (notifications) => {},
 })

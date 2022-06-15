@@ -351,6 +351,7 @@ const customStyles2 = {
 };
 
 const StyledContainer = styled.div`
+  grid-column: 1/3;
   min-width: 600px;
   background-color: aliceblue;
   margin: 0 20px;

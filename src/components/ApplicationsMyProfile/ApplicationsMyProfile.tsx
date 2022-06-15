@@ -4,10 +4,18 @@ import { StyledContainer } from "../ProjectsMyProfile/ProjectsMyProfile";
 import authContext from "../../context/auth-context";
 import ReactSelect from "react-select";
 import styled from "styled-components";
+import {
+  StyledSearchResult,
+  StyledSearchResultsContainer,
+} from "../Inside/SearchPage/SearchPage";
+
+import applicantsIcon from "../images/applicants.png";
+import membersIcon from "../images/members.png";
+import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 
 const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   const [projectsToPrint, setProjectsToPrint] = useState<any>([]);
-  const [applicationsFetched, setApplicationsFetched] = useState<any>(null);
+  const [applicationsFetched, setApplicationsFetched] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchSuccess, setFetchSuccess] = useState(false);
   const [fetchMessage, setFetchMessage] = useState("");
@@ -18,24 +26,27 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   const requestBody = {
     query: `
                 query {
-                    findUser(userId: "${context.userId}") {
-                        appliedProjects {
-                          project {
+                    applications(userId: "${context.userId}") {
+                        _id
+                        currentState
+                        message
+                        role
+                        project {
                             _id
                             title
                             description
                             roles
-                            level
-                            stacks
-                            timezone
-                            author {
-                              avatarIcon
-                              avatarIconColor
-                              avatarBackground
-                              nickname
+                            members {
+                                _id
                             }
                             applicantsCount
-                          }
+                            author {
+                                _id
+                                nickname
+                                avatarIcon
+                                avatarIconColor
+                                avatarBackground
+                            }
                         }
                     }
                 }
@@ -58,13 +69,17 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         if (!data.errors) {
           setFetchSuccess(true);
           props.fetchSuccess(true);
           setFetchMessage("All applications fetched!");
           props.fetchMessage("All applications fetched!");
-          setApplicationsFetched(data.data.findUser);
+          //   const applications = data.data.findUser.appliedProjects.map(
+          //     (x: any) => x.project
+          //   );
+          console.log(data.data);
+          setProjectsToPrint(data.data.applications);
+          setApplicationsFetched(data.data.applications);
         } else {
           if (data.errors[0].message.includes("Project.title")) {
             props.error("No applications found!");
@@ -97,14 +112,96 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
     fetchCreated();
   }, []);
 
+  const filterApplications = (option: any, results: any[]) => {
+    if (option === "All") {
+      setProjectsToPrint(results);
+    } else {
+      setProjectsToPrint(results.filter((x: any) => x.currentState === option));
+    }
+  };
 
   return (
     <StyledContainer>
       <StyledTopBar className="topBar">
-        <span>Applications ( results)</span>
-        <ReactSelect options={applicationOptions} defaultValue={applicationOptions[0]} styles={customStyles2} isSearchable={false}/>
+        <span>Applications ({applicationsFetched.length} results)</span>
+        <ReactSelect
+          options={applicationOptions}
+          defaultValue={applicationOptions[0]}
+          styles={customStyles2}
+          isSearchable={false}
+          onChange={(e: any) =>
+            filterApplications(e.value, applicationsFetched)
+          }
+        />
       </StyledTopBar>
-
+      <div className="projectsContainer">
+        {projectsToPrint.map((el: any, idx: number) => {
+          return (
+            // <StyledSearchResult
+            //   key={idx}
+            //   backgroundColor={el.author.avatarBackground}
+            //   iconColor={el.author.avatarIconColor}
+            // ></StyledSearchResult>
+            <StyledApplicationResult
+              key={idx}
+              state={el.currentState}
+              avatarIconColor={el.project.author.avatarIconColor}
+              avatarBackground={el.project.author.avatarBackground}
+            >
+              <h2>{el.role}</h2>
+              <p className={el.message ? "message" : "noMessage"}>
+                {el.message ? el.message : "No message"}
+              </p>
+              <div className="divider" />
+              <h3>Project details</h3>
+              <span>{el.project.title}</span>
+              <span>{el.project.description}</span>
+              <div className="divider" />
+              <div className="details">
+                <div className="author">
+                  <div className="avatarBackground" />
+                  <img src={avatarIcons[el.project.author.avatarIcon]} alt="" />
+                  <span className="authorName">
+                    {el.project.author.nickname === context.nickname
+                      ? "You"
+                      : el.project.author.nickname}
+                  </span>
+                </div>
+                <div className="applicants">
+                  <img src={applicantsIcon} alt="" />
+                  <span className="applicantsNumber">
+                    {el.project.applicantsCount}{" "}
+                    <span>
+                      {el.project.applicantsCount > 1 ||
+                      el.project.applicantsCount < 1
+                        ? "applicants"
+                        : "applicant"}
+                    </span>
+                  </span>
+                </div>
+                <div className="members">
+                  <img src={membersIcon} alt="" />
+                  <span className="membersNumber">
+                    {el.project.members.length} / {el.project.roles.length + 1}{" "}
+                    <span>members</span>
+                  </span>
+                </div>
+                <button
+                  className="applyButton"
+                  onClick={() => {
+                    // setApplyProjectID(el._id);
+                    // setClickedProject({
+                    //   ...el,
+                    // });
+                  }}
+                >
+                  View
+                </button>
+              </div>
+            </StyledApplicationResult>
+          );
+        })}
+      </div>
     </StyledContainer>
   );
 };
@@ -116,31 +213,158 @@ interface IProps {
   error(message: string): void;
 }
 
+interface IPropsApplication {
+  state: string;
+  avatarIconColor: string;
+  avatarBackground: string;
+}
+
 const applicationOptions = [
-    { label: "All", value: "All"},
-    { label: "Approved", value: "Approved"},
-    { label: "Pending", value: "Pending"},
-    { label: "Rejected", value: "Rejected"},
+  { label: "All", value: "All" },
+  { label: "Approved", value: "Approved" },
+  { label: "Pending", value: "Pending" },
+  { label: "Rejected", value: "Rejected" },
 ];
 
 const customStyles2 = {
-    menu: (provided: any, state: any) => ({
-      ...provided,
-    }),
-    option: (provided: any, state: any) => ({
-      ...provided,
-      fontSize: "1.4rem",
-    }),
-    control: (provided: any, state: any) => ({
-      ...provided,
-      fontSize: "3.4rem",
-      border: "1px solid gray",
-      width: "140px",
-    }),
-  };
+  menu: (provided: any, state: any) => ({
+    ...provided,
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    fontSize: "1.4rem",
+  }),
+  control: (provided: any, state: any) => ({
+    ...provided,
+    fontSize: "3.4rem",
+    border: "1px solid gray",
+    width: "140px",
+  }),
+};
 
-const StyledApplicationResult = styled.div`
+const StyledApplicationResult = styled.div<IPropsApplication>`
+  padding: 20px;
+  height: max-content;
+  border-radius: 15px;
+  background-color: aliceblue;
+  grid-column: 1/2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
+  box-shadow: -7px 0px 1px -2px ${(props) => (props.state === "Approved" ? "#008148" : props.state === "Pending" ? "#FCBA04" : "#E94F37")};
+
+  h2 {
+    font-size: 1.8rem;
+  }
+  .message {
+    font-size: 1.4rem;
+    color: gray;
+  }
+  .noMessage {
+    font-size: 1.2rem;
+    color: #a9a9a9;
+  }
+  h3 {
+    font-size: 1.6rem;
+  }
+
+  span:nth-child(5) {
+    font-size: 1.6rem;
+  }
+
+  span:nth-child(6) {
+    font-size: 1.4rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: gray;
+    @supports (-webkit-line-clamp: 2) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: initial;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+  .divider {
+    width: 100%;
+    background-color: #bdbdbd;
+    height: 1px;
+  }
+
+  .details {
+    display: flex;
+    justify-content: space-between;
+  }
+  .author {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 5px;
+    align-items: center;
+    .avatarBackground {
+      background-color: ${(props) => props.avatarBackground};
+      width: 40px;
+      height: 40px;
+      grid-column: 1/1;
+      grid-row: 1/1;
+      justify-self: center;
+      border-radius: 50%;
+    }
+    img {
+      width: 30px;
+      grid-column: 1/1;
+      grid-row: 1/1;
+      justify-self: center;
+      filter: invert(
+        ${(props) => (props.avatarIconColor === "#000000" ? 0 : 1)}
+      );
+    }
+    .authorName {
+      font-size: 1.4rem;
+      font-family: "RegularFont";
+    }
+  }
+
+  .applicants,
+  .members {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    align-items: center;
+    img {
+      width: 40px;
+      filter: opacity(0.6);
+    }
+    .applicantsNumber,
+    .membersNumber {
+      font-size: 2rem;
+      font-family: "RegularFont";
+
+      span {
+        color: gray;
+      }
+    }
+  }
+
+  .applyButton,
+  .viewButton {
+    margin-top: 15px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 15px;
+    background: tomato;
+    height: max-content;
+    width: max-content;
+    justify-self: end;
+    padding: 10px 30px;
+    color: white;
+    font-size: 1.6rem;
+    font-family: "LightFont";
+  }
 `;
 
 export default ApplicationsMyProfile;

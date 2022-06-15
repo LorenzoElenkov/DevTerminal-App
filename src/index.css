@@ -16,9 +16,9 @@ button:hover {
 
 main {
   display: grid;
-  grid-template-columns: 270px 3.5fr 0.75fr 4%;
+  grid-template-columns: 270px 3.5fr 0.75fr 2%;
   column-gap: 20px;
-  grid-template-rows: repeat(4, minmax(100vh, max-content));
+  /* grid-template-rows: repeat(4, minmax(100vh, max-content)); */
 }
 
 @font-face {

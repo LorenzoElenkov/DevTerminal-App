@@ -196,6 +196,11 @@ const Login: FC<IProps> = ({ close }: IProps) => {
                     avatarIcon,
                     avatarIconColor,
                     avatarBackground
+                    notifications {
+                      state
+                      read
+                      message
+                    }
                 }
             }
         `,
@@ -229,9 +234,9 @@ const Login: FC<IProps> = ({ close }: IProps) => {
             resData.data.login.skills,
             resData.data.login.avatarIcon,
             resData.data.login.avatarIconColor,
-            resData.data.login.avatarBackground
+            resData.data.login.avatarBackground,
+            resData.data.login.notifications,
           );
-          console.log(resData.data.login);
           close("");
           navigate("/profile");
         }

@@ -1,22 +1,40 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 // import { StyledSearchResult } from "../ProjectContainer/ProjectContainer";
 import { StyledSearchResult } from "../Inside/SearchPage/SearchPage";
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import applicantsIcon from "../images/applicants.png";
 import authContext from "../../context/auth-context";
+import ReactSelect from "react-select";
+import membersIcon from "../images/members.png";
+
 const ApplyProject: React.FC<IProps> = (props) => {
   const context = useContext(authContext);
   const backdropRef = useRef(null);
 
-  const [messageValue, setMessageValue] = useState<string>(''); 
+  const roleSelectRef = useRef<any>(null);
+
+  const [roleSelectValue, setRoleSelectValue] = useState<string>("");
+  const [messageValue, setMessageValue] = useState<string>("");
 
   const onClickOutside = (e: any) => {
     if (e.target === backdropRef.current) {
       props.close();
     }
-  }
+  };
+
+  useEffect(() => {
+    roleOptions.length = 0;
+    props.data.roles.map((x: any) => {
+      return roleOptions.push({ value: x, label: x });
+    });
+  }, []);
+
+  const changeRoleSelect = (e: any) => {
+    setRoleSelectValue(e.value);
+  };
+
   return (
     <StyledBackdrop onClick={(e) => onClickOutside(e)} ref={backdropRef}>
       <StyledSearchResult
@@ -24,7 +42,9 @@ const ApplyProject: React.FC<IProps> = (props) => {
         backgroundColor={props.data.author.avatarBackground}
         iconColor={props.data.author.avatarIconColor}
       >
-        <button className="closeWindow" onClick={props.close}>X</button>
+        <button className="closeWindow" onClick={props.close}>
+          X
+        </button>
         <h3 className="role">{props.data.title}</h3>
         <h5 className="expLevel">{props.data.level.join(" / ")}</h5>
         <span className="description">{props.data.description}</span>
@@ -83,15 +103,38 @@ const ApplyProject: React.FC<IProps> = (props) => {
             {props.data.applicantsCount} <span>applicants</span>
           </span>
         </div>
+        <div className="members">
+          <img src={membersIcon} alt="" />
+          <span className="membersNumber">
+            {props.data.members.length} / {props.data.roles.length + 1} <span>members</span>
+          </span>
+        </div>
       </StyledSearchResult>
+      <span className="arrowDown">\/</span>
       <StyledApplicationMessage>
+        <h1>Application</h1>
+        <h2>Applying for role</h2>
+        <ReactSelect
+          options={roleOptions}
+          isSearchable={false}
+          placeholder="Role"
+          styles={customStyles2}
+          ref={roleSelectRef}
+          onChange={changeRoleSelect}
+        />
         <h2>Message</h2>
-        <input type="text" placeholder="(Optional) Type any additional information you want to share..." value={messageValue} onChange={(e) => setMessageValue(e.target.value)}/>
+        <input
+          type="text"
+          placeholder="(Optional) Type any additional information you want to share..."
+          value={messageValue}
+          onChange={(e) => setMessageValue(e.target.value)}
+        />
         <button
           className="applyButton"
           onClick={() => {
-              props.apply(messageValue);
+            props.apply(messageValue, roleSelectValue);
           }}
+          disabled={roleSelectValue === ""}
         >
           Apply
         </button>
@@ -112,6 +155,7 @@ interface IProps {
     stacks: string[];
     timezone: string[];
     applicantsCount: string[];
+    members: string[];
     author: {
       _id: string;
       email: string;
@@ -122,8 +166,27 @@ interface IProps {
     };
   };
   close(): void;
-  apply(message: string): void;
+  apply(message: string, role: string): void;
 }
+
+const roleOptions: any = [];
+
+const customStyles2 = {
+  menu: (provided: any, state: any) => ({
+    ...provided,
+    width: "300px",
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    fontSize: "1.4rem",
+  }),
+  control: (provided: any, state: any) => ({
+    ...provided,
+    fontSize: "3.4rem",
+    border: "1px solid gray",
+    width: "300px",
+  }),
+};
 
 const StyledApplicationMessage = styled.div`
   width: 50%;
@@ -133,16 +196,26 @@ const StyledApplicationMessage = styled.div`
   display: grid;
   grid-template-columns: repeat (3, 1fr);
   row-gap: 15px;
+
+  h1 {
+    font-size: 2.2rem;
+    grid-column: 1/4;
+    justify-self: center;
+    margin-bottom: 20px;
+  }
   h2 {
     font-size: 1.6rem;
     grid-column: 1/4;
+  }
+  h2:nth-child(4) {
+    margin-top: 10px;
   }
 
   input {
     font-size: 1.4rem;
     padding: 5px 0 5px 5px;
     grid-column: 1/4;
-    font-family: 'LightFont';
+    font-family: "LightFont";
   }
 
   .applyButton {
@@ -158,6 +231,16 @@ const StyledApplicationMessage = styled.div`
     font-size: 1.6rem;
     font-family: "LightFont";
   }
+
+  .applyButton:disabled {
+    background: gray;
+    cursor: not-allowed;
+  }
+`;
+
+const arrowAnimation = keyframes`
+  0% { transform: translateY(0)}
+  25% { transform: translateY(10px) }
 `;
 
 const StyledBackdrop = styled.div`
@@ -174,6 +257,7 @@ const StyledBackdrop = styled.div`
   align-items: center;
   z-index: 3;
   overflow-y: scroll;
+
   .applyWindow {
     width: 50%;
     position: relative;
@@ -203,5 +287,13 @@ const StyledBackdrop = styled.div`
         -webkit-box-orient: vertical;
       }
     }
+  }
+  .arrowDown {
+    color: white;
+    letter-spacing: -0.4rem;
+    font-size: 3rem;
+    font-weight: 900;
+    animation: ${arrowAnimation} 3s infinite;
+    animation-fill-mode: forwards;
   }
 `;

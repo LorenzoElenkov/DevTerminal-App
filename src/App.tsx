@@ -44,7 +44,8 @@ function App() {
     stacks: string[],
     avatarIcon: number,
     avatarIconColor: string,
-    avatarBackground: string
+    avatarBackground: string,
+    notifications: Object[],
   ) => {
     setUserMetaData({
       token: token,
@@ -57,6 +58,7 @@ function App() {
       avatarIcon: avatarIcon,
       avatarIconColor: avatarIconColor,
       avatarBackground: avatarBackground,
+      notifications: notifications
     });
   };
 
@@ -92,7 +94,8 @@ function App() {
     nickname: string,
     avatarIcon: number,
     avatarIconColor: string,
-    avatarBackground: string
+    avatarBackground: string,
+    notifications: Object[],
   ) => {
     setUserMetaData((prevState: any) => {
       return {
@@ -104,9 +107,19 @@ function App() {
         avatarIcon: avatarIcon,
         avatarIconColor: avatarIconColor,
         avatarBackground: avatarBackground,
+        notifications: notifications,
       };
     });
   };
+
+  const updateNotifications = (notifications: Object[]) => {
+    setUserMetaData((prevState: any) => {
+      return {
+        ...prevState,
+        notifications: notifications
+      }
+    })
+  }
   return (
     <BrowserRouter>
       <AuthContext.Provider
@@ -121,10 +134,12 @@ function App() {
           avatarIcon: userMetaData.avatarIcon,
           avatarIconColor: userMetaData.avatarIconColor,
           avatarBackground: userMetaData.avatarBackground,
+          notifications: userMetaData.notifications,
           login: login,
           logout: logout,
           setNickname: setNickname,
           updateUser: updateUser,
+          updateNotifications: updateNotifications,
         }}
       >
         <Header loginSignup={setAuthModal} logout={logout} />

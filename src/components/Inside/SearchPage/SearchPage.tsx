@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import searchIcon from "../../images/searchIcon.png";
 import applicantsIcon from "../../images/applicants.png";
+import membersIcon from "../../images/members.png";
 
 import authContext from "../../../context/auth-context";
 
@@ -231,6 +232,9 @@ const SearchPage: React.FC<IProps> = (props) => {
                       avatarBackground
                     }
                     applicantsCount
+                    members {
+                      _id
+                    }
                 }
             }
         `,
@@ -304,7 +308,8 @@ const SearchPage: React.FC<IProps> = (props) => {
         applyProject(applyInput: {
             project: "${applyProjectID[0]}",
             user: "${context.userId}",
-            message: "${applyProjectID[1]}"
+            message: "${applyProjectID[1]}",
+            role: "${applyProjectID[2]}"
         }) {
             _id
         }
@@ -367,6 +372,7 @@ const SearchPage: React.FC<IProps> = (props) => {
           <button onClick={() => fetchSearchProjects()}>Search</button>
         </StyledSearchField>
         <StyledSearchResultsContainer>
+          {fetchedProjects?.length === 0 && <span className="noResults">No results found</span>}
           {fetchedProjects?.map((el: any, idx: number) => {
             return (
               <StyledSearchResult
@@ -450,7 +456,13 @@ const SearchPage: React.FC<IProps> = (props) => {
                 <div className="applicants">
                   <img src={applicantsIcon} alt="" />
                   <span className="applicantsNumber">
-                    {el.applicantsCount} <span>applicants</span>
+                    {el.applicantsCount} <span>{el.applicantsCount > 1 || el.applicantsCount < 1 ? 'applicants' : 'applicant'}</span>
+                  </span>
+                </div>
+                <div className="members">
+                  <img src={membersIcon} alt="" />
+                  <span className="membersNumber">
+                    {el.members.length} / {el.roles.length + 1} <span>members</span>
                   </span>
                 </div>
                 <button
@@ -468,7 +480,7 @@ const SearchPage: React.FC<IProps> = (props) => {
             );
           })}
         </StyledSearchResultsContainer>
-        {!isLoading && (
+        {!isLoading && queryPages.length > 0 && (
           <StyledSearchFieldPagination>
             {currentPage !== 1 && (
               <button onClick={() => setCurrentPage(1)}>{"<"}</button>
@@ -1005,7 +1017,7 @@ const SearchPage: React.FC<IProps> = (props) => {
         <ApplyProject
           data={clickedProject}
           close={closeApplicationWindow}
-          apply={(message) => {setApplyProjectID([clickedProject._id, message]); }}
+          apply={(message: string, role: string) => {setApplyProjectID([clickedProject._id, message, role]); }}
         />
       )}
     </StyledContainer>
@@ -1147,19 +1159,23 @@ const StyledSearchFieldPagination = styled.div`
   }
 `;
 
-const StyledSearchResultsContainer = styled.div`
+export const StyledSearchResultsContainer = styled.div`
   grid-column: 1/3;
   grid-row: 2/2;
   display: flex;
   flex-direction: column;
   gap: 20px;
 
-  @media screen and (min-width: 1500px) {
+  .noResults {
+    font-size: 2rem;
+    text-align: center;
+  }
+  /* @media screen and (min-width: 1500px) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     row-gap: 20px;
     column-gap: 10px;
-  }
+  } */
 `;
 
 export const StyledSearchResult = styled.div<ProjectContainerProps>`
@@ -1169,26 +1185,26 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
   height: max-content;
   padding: 20px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   row-gap: 5px;
   h3 {
     font-size: 2rem;
     font-family: "RegularFont";
-    grid-column: 1/4;
+    grid-column: 1/5;
     letter-spacing: 0.5px;
   }
   h5 {
     font-size: 1.2rem;
     color: gray;
     letter-spacing: 1px;
-    grid-column: 1/4;
+    grid-column: 1/5;
   }
   .description {
     margin-top: 15px;
     font-size: 1.6rem;
     letter-spacing: 0.3px;
     color: gray;
-    grid-column: 1/4;
+    grid-column: 1/5;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -1214,7 +1230,7 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
   .timezoneContainer,
   .stacksContainer,
   .rolesContainer {
-    grid-column: 1/4;
+    grid-column: 1/5;
     display: flex;
     flex-direction: column;
     /* height: max-content; */
@@ -1279,7 +1295,7 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     }
   }
   .divider {
-    grid-column: 1/4;
+    grid-column: 1/5;
     width: 100%;
     border-bottom: 1px solid lightgray;
   }
@@ -1310,7 +1326,7 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
       font-family: "RegularFont";
     }
   }
-  .applicants {
+  .applicants, .members {
     margin-top: 15px;
     display: flex;
     flex-wrap: nowrap;
@@ -1318,8 +1334,9 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     align-items: center;
     img {
       width: 40px;
+      filter: opacity(0.6);
     }
-    .applicantsNumber {
+    .applicantsNumber, .membersNumber {
       font-size: 2rem;
       font-family: "RegularFont";
 
@@ -1328,7 +1345,8 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
       }
     }
   }
-  .applyButton {
+
+  .applyButton, .viewButton {
     margin-top: 15px;
     margin-left: 10px;
     border: none;
@@ -1342,6 +1360,7 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     font-size: 1.6rem;
     font-family: "LightFont";
   }
+
 `;
 
 const StyledFilterContainer = styled.div`

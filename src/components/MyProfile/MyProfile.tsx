@@ -5,6 +5,7 @@ import AuthContext from "../../context/auth-context";
 import ApplicationsMyProfile from "../ApplicationsMyProfile/ApplicationsMyProfile";
 import CreateProject from "../CreateProject/CreateProject";
 import EditMyProfile from "../EditMyProfile/EditMyProfile";
+import Notifications from "../Notifications/Notifications";
 
 import ProjectsMyProfile from "../ProjectsMyProfile/ProjectsMyProfile";
 
@@ -17,11 +18,11 @@ const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMes
           <>
             {context.token !== "" ? (
               <StyledContainer>
-                {/* <StyledToolAndProjects> */}
                 {subMenu === "edit_profile" && <EditMyProfile isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
                 {subMenu === "create_project" && <CreateProject isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
                 {subMenu === "" && <ProjectsMyProfile isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
                 {subMenu === "applications" && <ApplicationsMyProfile isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
+                {subMenu === "notifications" && <Notifications />}
               </StyledContainer>
             ) : (
               <StyledContainer>
@@ -51,13 +52,14 @@ interface IProps {
   avatarBackground: string;
 }
 
-const StyledContainer = styled.div`
+const StyledContainer = styled.aside`
   padding: 0px 0 50px 0;
   display: grid;
-  grid-template-columns: 1fr;
+  /* grid-template-columns: 1fr; */
+  grid-template-columns: 1fr 0.5fr 0.5fr;
   grid-template-rows: repeat(auto-fit, max-content);
   font-family: "LightFont";
-  grid-column: 2/2;
+  grid-column: 2/4;
   & > span {
     grid-column: 1/5;
     justify-self: center;

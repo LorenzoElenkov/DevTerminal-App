@@ -24,6 +24,7 @@ const StyledContainer = styled.section`
     grid-template-columns: 1fr 1fr;
     grid-column: 1/6;
     grid-row: 1/1;
+    height: 100vh;
 `;
 
 

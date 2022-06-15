@@ -6,6 +6,8 @@ import { StyledTopBar } from "../EditMyProfile/EditMyProfile";
 import { StyledSearchResult } from "../Inside/SearchPage/SearchPage";
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import applicantsIcon from "../images/applicants.png";
+import membersIcon from "../images/members.png";
+import ViewCreatedProject from "../ViewCreatedProject/ViewCreatedProject";
 
 const ProjectsMyProfile: React.FC<IProps> = (props) => {
   const context = useContext(AuthContext);
@@ -16,6 +18,8 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
   const [fetchSuccess, setFetchSuccess] = useState(false);
   const [fetchMessage, setFetchMessage] = useState("");
   const [error, setError] = useState("");
+
+  const [clickedProject, setClickedProject] = useState<any>(undefined);
 
   const requestBody = {
     query: `
@@ -35,7 +39,23 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                           avatarBackground
                           nickname
                       }
+                        applicants {
+                          _id
+                          currentState
+                          message
+                          user {
+                            _id
+                            nickname
+                            avatarIcon
+                            avatarIconColor
+                            avatarBackground
+                          }
+                          role
+                        }
                         applicantsCount
+                        members {
+                          _id
+                        }
                     }
                     inProjects {
                         _id
@@ -52,6 +72,9 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                           nickname
                       }
                       applicantsCount
+                      members {
+                        _id
+                      }
                     }
                     appliedProjects {
                       project {
@@ -69,6 +92,9 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                           nickname
                         }
                         applicantsCount
+                        members {
+                          _id
+                        }
                       }
                     }
                 }
@@ -92,7 +118,7 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
+        // console.log(data);
         if (!data.errors) {
           setFetchSuccess(true);
           props.fetchSuccess(true);
@@ -100,8 +126,8 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
           props.fetchMessage("All projects fetched!");
           setProjectsFetched(data.data.findUser);
         } else {
-          if (data.errors[0].message.includes('Project.title')) {
-            props.error('No projects found!');
+          if (data.errors[0].message.includes("Project.title")) {
+            props.error("No projects found!");
           } else {
             console.log(data.errors[0].message);
             props.error(data.errors[0].message);
@@ -141,27 +167,27 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
   }, []);
 
   const changeProjectsFilter = (e: any) => {
-    // if (e.value === "All") {
-    //   let createdAndInProjects = projectsFetched.createdProjects.concat(
-    //     projectsFetched.inProjects.filter(
-    //       (i: any) => projectsFetched.createdProjects.indexOf(i) > 0
-    //     )
-    //   );
-    //   let allProjects = [
-    //     ...createdAndInProjects,
-    //     ...projectsFetched.appliedProjects,
-    //   ];
-    //   console.log(allProjects);
-    //   setProjectsToPrint(allProjects);
-    // } else 
     if (e.value === "Created") {
       setProjectsToPrint(projectsFetched.createdProjects);
     } else if (e.value === "Partaking") {
-      setProjectsToPrint(projectsFetched.inProjects);
+      let filteredProjects = projectsFetched.inProjects.filter((x: any) => x.author.nickname !== context.nickname)
+      setProjectsToPrint(filteredProjects);
     } else if (e.value === "Applied for") {
-      const appliedProjects = projectsFetched.appliedProjects.map((x: any) => x.project);
+      const appliedProjects = projectsFetched.appliedProjects.map(
+        (x: any) => x.project
+      );
       setProjectsToPrint(appliedProjects);
     }
+  };
+
+  const checkApplicants = (state: string, applicants: any) => {
+    let count = 0;
+    applicants?.forEach((el: any) => {
+      if (el.currentState === state) {
+        count++;
+      }
+    })
+    return count;
   };
 
   return (
@@ -179,81 +205,115 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
       <div className="projectsContainer">
         {projectsToPrint.map((el: any, idx: number) => {
           return (
-            <StyledSearchResult
-              key={idx}
-              backgroundColor={el.author.avatarBackground}
-              iconColor={el.author.avatarIconColor}
-            >
-              <h3 className="role">{el.title}</h3>
-              <h5 className="expLevel">{el.level.join(" / ")}</h5>
-              <span className="description">{el.description}</span>
-              <div className="rolesContainer">
-                <span>Looking for </span>
-                <div className="wrapper">
-                  {el.roles.map((ele: any, idxx: number) => {
-                    return (
-                      <span key={idxx} className="timezoneBox">
-                        {ele}
-                      </span>
-                    );
-                  })}
-                  <button className="btn-expand">More...</button>
-                </div>
-              </div>
-              <div className="stacksContainer">
-                <span>Tech stacks </span>
-                <div className="wrapper">
-                  {el.stacks.map((ele: any, idxx: number) => {
-                    return (
-                      <span key={idxx} className="timezoneBox">
-                        {ele}
-                      </span>
-                    );
-                  })}
-                  <button className="btn-expand">More...</button>
-                </div>
-              </div>
-              <div className="timezoneContainer">
-                <span>Timezones </span>
-                <div className="wrapper">
-                  {el.timezone.map((ele: any, idxx: number) => {
-                    return (
-                      <span key={idxx} className="timezoneBox">
-                        GMT{ele}
-                      </span>
-                    );
-                  })}
-                  <button className="btn-expand">More...</button>
-                </div>
-              </div>
-              <span className="divider"></span>
-              <div className="author">
-                <div className="avatarBackground" />
-                <img src={avatarIcons[el.author.avatarIcon]} alt="" />
-                <span className="authorName">
-                  {el.author.nickname === context.nickname
-                    ? "You"
-                    : el.author.nickname}
-                </span>
-              </div>
-              <div className="applicants">
-                <img src={applicantsIcon} alt="" />
-                <span className="applicantsNumber">
-                  {el.applicantsCount} <span>applicants</span>
-                </span>
-              </div>
-              <button
-                className="applyButton"
-                onClick={() => {
-                  // setApplyProjectID(el._id);
-                }}
+            <>
+              <StyledSearchResult
+                key={idx}
+                backgroundColor={el.author.avatarBackground}
+                iconColor={el.author.avatarIconColor}
+                className="result"
               >
-                View
-              </button>
-            </StyledSearchResult>
+                <h3 className="role">{el.title}</h3>
+                <h5 className="expLevel">{el.level.join(" / ")}</h5>
+                <span className="description">{el.description}</span>
+                <div className="rolesContainer">
+                  <span>Looking for </span>
+                  <div className="wrapper">
+                    {el.roles.map((ele: any, idxx: number) => {
+                      return (
+                        <span key={idxx} className="timezoneBox">
+                          {ele}
+                        </span>
+                      );
+                    })}
+                    <button className="btn-expand">More...</button>
+                  </div>
+                </div>
+                <div className="stacksContainer">
+                  <span>Tech stacks </span>
+                  <div className="wrapper">
+                    {el.stacks.map((ele: any, idxx: number) => {
+                      return (
+                        <span key={idxx} className="timezoneBox">
+                          {ele}
+                        </span>
+                      );
+                    })}
+                    <button className="btn-expand">More...</button>
+                  </div>
+                </div>
+                <div className="timezoneContainer">
+                  <span>Timezones </span>
+                  <div className="wrapper">
+                    {el.timezone.map((ele: any, idxx: number) => {
+                      return (
+                        <span key={idxx} className="timezoneBox">
+                          GMT{ele}
+                        </span>
+                      );
+                    })}
+                    <button className="btn-expand">More...</button>
+                  </div>
+                </div>
+                <span className="divider"></span>
+                <div className="author">
+                  <div className="avatarBackground" />
+                  <img src={avatarIcons[el.author.avatarIcon]} alt="" />
+                  <span className="authorName">
+                    {el.author.nickname === context.nickname
+                      ? "You"
+                      : el.author.nickname}
+                  </span>
+                </div>
+                <div className="applicants">
+                  <img src={applicantsIcon} alt="" />
+                  <span className="applicantsNumber">
+                    {el.applicantsCount}{" "}
+                    <span>
+                      {el.applicantsCount < 1 || el.applicantsCount > 1
+                        ? "applicants"
+                        : "applicant"}
+                    </span>
+                  </span>
+                </div>
+                <div className="members">
+                  <img src={membersIcon} alt="" />
+                  <span className="membersNumber">
+                    {el.members.length} / {el.roles.length + 1}{" "}
+                    <span>members</span>
+                  </span>
+                </div>
+                <button
+                  className="viewButton"
+                  onClick={() => {
+                    setClickedProject({
+                      ...el
+                    })
+                  }}
+                >
+                  View
+                </button>
+              </StyledSearchResult>
+              {el.author.nickname === context.nickname && (
+                <StyledResultCreatedDetails key={`${idx}:${el.author}`}>
+                  <h2>Applicants</h2>
+                  <div>
+                    <span>Approved: {checkApplicants('Approved', el.applicants)}</span>
+                  </div>
+                  <div>
+                    <span>Pending: {checkApplicants('Pending', el.applicants)}</span>
+                  </div>
+                  <div>
+                    <span>Rejected: {checkApplicants('Rejected', el.applicants)}</span>
+                  </div>
+                </StyledResultCreatedDetails>
+              )}
+            </>
           );
         })}
       </div>
+      {clickedProject !== undefined && (
+        <ViewCreatedProject close={() => setClickedProject(undefined)} data={clickedProject} isLoading={props.isLoading} fetchSuccess={props.fetchSuccess} fetchMessage={props.fetchMessage} error={props.error}/>
+      )}
     </StyledContainer>
   );
 };
@@ -277,7 +337,7 @@ interface ProjectProps {
   timezone: [string];
 }
 
-const customStyles2 = {
+export const customStyles2 = {
   menu: (provided: any, state: any) => ({
     ...provided,
   }),
@@ -311,18 +371,17 @@ const selectOptions = [
 export const StyledContainer = styled.div`
   min-width: 850px;
   margin-top: 100px;
-  .createdProjects {
-    display: flex;
-    flex-direction: column;
-  }
+  grid-column: 1/4;
 
   .topBar {
+    max-width: 72%;
+    min-width: 400px;
     height: max-content;
     padding: 20px;
     margin: 0 20px;
     gap: 40px;
     background-color: aliceblue;
-    grid-column: 3/5;
+    /* grid-column: 3/5; */
     border-radius: 15px;
     box-shadow: -7px 0px 1px -2px #6564db;
     font-size: 2.8rem;
@@ -344,11 +403,43 @@ export const StyledContainer = styled.div`
     }
   }
 
-  .projectsContainer {
+  .projectsContainer, .projectsContainerNotification {
     margin: 0 20px;
     margin-top: 20px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
     gap: 10px;
+
+    .result {
+      grid-column: 1/2;
+    }
+
+    .resultCreatedData {
+      grid-column: 2/2;
+    }
+  }
+  .projectsContainerNotification {
+    gap: 20px;
+  }
+`;
+
+const StyledResultCreatedDetails = styled.div`
+  min-width: 300px;
+  background-color: aliceblue;
+  height: max-content;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+
+  h2 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  span {
+    font-size: 1.4rem;
   }
 `;
