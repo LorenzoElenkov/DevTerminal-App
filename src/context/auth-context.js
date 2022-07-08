@@ -16,10 +16,11 @@ export const globalContext = React.createContext({
     avatarBackground: '',
     notifications: [],
     rooms: [],
+    github: '',
     socketId: '',
-    login: (token, userId, nickname, email, bio, role, stacks, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, socketId, tokenExpiration) => {},
+    login: (token, userId, nickname, email, bio, role, stacks, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, github, socketId, tokenExpiration) => {},
     logout: () => {},
     setNickname: (nickname) => {},
-    updateUser: (bio, role, stacks, nickname, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, socketId) => {},
+    updateUser: (bio, role, stacks, nickname, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, github, socketId) => {},
     updateNotifications: (notifications) => {},
 })

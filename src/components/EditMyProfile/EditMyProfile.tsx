@@ -16,6 +16,8 @@ const EditMyProfile: React.FC<IProps> = (props) => {
   const [role, setRole] = useState("");
   const [bio, setBio] = useState("");
   const [stacks, setStacks] = useState<String[]>([]);
+  const [github, setGithub] = useState<string>("");
+  const [linkedin, setLinkedin] = useState<string>("");
 
   const [userData, setUserData] = useState<any>({});
 
@@ -60,6 +62,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
                     avatarIcon: "${avatarImage}",
                     avatarIconColor: "${avatarInvert}",
                     avatarBackground: "${avatarColor}",
+                    github: "${github}",
                 }) {
                     _id
                     nickname
@@ -69,6 +72,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
                     avatarIcon
                     avatarIconColor
                     avatarBackground
+                    github
                 }
             }
         `,
@@ -100,7 +104,9 @@ const EditMyProfile: React.FC<IProps> = (props) => {
             avatarImage,
             avatarInvert,
             avatarColor,
-            [...context.notifications]
+            [...context.notifications],
+            context.rooms,
+            github,
           );
           setHasUpdated(true);
           props.fetchSuccess(true);
@@ -149,13 +155,15 @@ const EditMyProfile: React.FC<IProps> = (props) => {
         avatarIcon: context.avatarIcon,
         avatarIconColor: context.avatarIconColor,
         avatarBackground: context.avatarBackground,
-        notifications: context.notifications,
+        // notifications: context.notifications,
+        github: context.github,
       });
       setFirstName(context.nickname?.split(" ")[0]);
       setLastName(context.nickname.split(" ")[1]);
       setRole(context.role);
       setBio(context.bio);
       setStacks(context.stacks);
+      setGithub(context.github);
     } else {
       setError("Please fill out your account details!");
       props.error("Please fill out your account details!");
@@ -171,6 +179,8 @@ const EditMyProfile: React.FC<IProps> = (props) => {
     setAvatarImage(context.avatarIcon);
     setAvatarColor(context.avatarBackground);
   }, []);
+
+  console.log(context);
 
   const changeHandler = (el: any) => {
     let rawData = [];
@@ -220,6 +230,10 @@ const EditMyProfile: React.FC<IProps> = (props) => {
       setRole(e.target.value);
     } else if (state === "bio") {
       setBio(e.target.value);
+    } else if (state === "github") {
+      setGithub(e.target.value);
+    } else if (state === "linkedin") {
+      setLinkedin(e.target.value);
     }
   };
 
@@ -330,6 +344,8 @@ const EditMyProfile: React.FC<IProps> = (props) => {
                 className="stacksInput"
                 onChange={(e: any) => changeHandler(e)}
               />
+              <label className="githubLabel">Github</label>
+              <input type='text' className='githubInput' onChange={(e: any) => inputHandler(e, "github", null)} value={github}/>
               <div className="divider" />
               <label className="emailLabel">Email</label>
               <input
@@ -522,14 +538,18 @@ const StyledBody = styled.div<IPropsImage>`
   .firstInput,
   .roleInput,
   .imageLabel,
-  .imageInput {
+  .imageInput,
+  .githubLabel,
+  .githubInput {
     grid-column: 1/1;
     font-size: 1.4rem;
   }
   .lastLabel,
   .stacksLabel,
   .lastInput,
-  .stacksInput {
+  .stacksInput,
+  .linkedinLabel,
+  .linkedinInput {
     grid-column: 2/2;
     font-size: 1.4rem;
   }
@@ -541,7 +561,7 @@ const StyledBody = styled.div<IPropsImage>`
   .passwordLabel {
     font-size: 1.4rem;
     grid-column: 2/2;
-    grid-row: 11/11;
+    grid-row: 13/13;
     margin-top: 20px;
   }
   .passwordButton,
@@ -566,7 +586,7 @@ const StyledBody = styled.div<IPropsImage>`
     font-size: 1.4rem;
     border-radius: 10px;
     grid-column: 2/2;
-    grid-row: 9/9;
+    grid-row: 11/11;
     margin-bottom: 20px;
   }
   .divider {
@@ -580,6 +600,9 @@ const StyledBody = styled.div<IPropsImage>`
   }
   .stacksLabel {
     grid-row: 7/7;
+  }
+  .linkedinLabel {
+    grid-row: 9/9;
   }
   input {
     padding: 5px 10px;

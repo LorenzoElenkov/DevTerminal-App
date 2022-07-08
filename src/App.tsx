@@ -12,7 +12,6 @@ import SearchPage from "./components/Inside/SearchPage/SearchPage";
 import MyProfile from "./components/MyProfile/MyProfile";
 import Sidebar from "./components/MyProfile/Sidebar";
 import { StyledFetchModal } from "./components/CreateProject/CreateProject";
-import { Socket } from "socket.io-client";
 
 function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,6 +41,7 @@ function App() {
     avatarBackground: "",
     notifications: [],
     rooms: [],
+    github: "",
     socketId: "",
   });
 
@@ -58,6 +58,7 @@ function App() {
     avatarBackground: string,
     notifications: Object[],
     rooms: string[],
+    github: string,
     socketId: string,
   ) => {
     setUserMetaData({
@@ -73,6 +74,7 @@ function App() {
       avatarBackground: avatarBackground,
       notifications: notifications,
       rooms: rooms,
+      github: github,
       socketId: socketId,
     });
   };
@@ -91,6 +93,7 @@ function App() {
       stacks: [],
       notifications: [],
       rooms: [],
+      github: "",
       socketId: "",
     });
     setSubmenu("");
@@ -115,6 +118,7 @@ function App() {
     avatarBackground: string,
     notifications: Object[],
     rooms: string[],
+    github: string,
     socketId: string,
   ) => {
     setUserMetaData((prevState: any) => {
@@ -129,6 +133,7 @@ function App() {
         avatarBackground: avatarBackground,
         notifications: notifications,
         rooms: rooms,
+        github: github,
         socketId: socketId,
       };
     });
@@ -158,6 +163,7 @@ function App() {
           avatarBackground: userMetaData.avatarBackground,
           notifications: userMetaData.notifications,
           rooms: userMetaData.rooms,
+          github: userMetaData.github,
           socketId: userMetaData.socketId,
           login: login,
           logout: logout,

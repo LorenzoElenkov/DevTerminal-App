@@ -1,9 +1,7 @@
 import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { StyledFetchModal } from "../../CreateProject/CreateProject";
 
-import io from "socket.io-client";
 
 import searchIcon from "../../images/atIcon.png";
 import passIcon from "../../images/passIcon.png";
@@ -200,6 +198,7 @@ const Login: FC<IProps> = ({ close }: IProps) => {
                       message
                     }
                     rooms
+                    github
                 }
             }
         `,
@@ -225,6 +224,7 @@ const Login: FC<IProps> = ({ close }: IProps) => {
         } else if (resData.data.login.token) {
           socket.connect();
           socket.on("connect", () => {
+            // currently sending online status online on Login.
             socket.emit("send_online_status", {user: resData.data.login.userId, socketId: socket.id});
             context.login(
               resData.data.login.token,
@@ -239,6 +239,7 @@ const Login: FC<IProps> = ({ close }: IProps) => {
               resData.data.login.avatarBackground,
               resData.data.login.notifications,
               resData.data.login.rooms,
+              resData.data.login.github,
               socket.id
             );
             close("");
