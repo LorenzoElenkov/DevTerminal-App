@@ -1,18 +1,26 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import AuthContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 import ApplicationsMyProfile from "../ApplicationsMyProfile/ApplicationsMyProfile";
 import CreateProject from "../CreateProject/CreateProject";
 import EditMyProfile from "../EditMyProfile/EditMyProfile";
-import Notifications from "../Notifications/Notifications";
 
 import ProjectsMyProfile from "../ProjectsMyProfile/ProjectsMyProfile";
 
 const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMessage, error }) => {
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
+  const joinRooms = () => {
+    socket.emit("roomsJoin", context.rooms);
+  }
+
+  useEffect(() => {
+    if (context.token !== '') {
+      joinRooms();
+    }
+  },[context.token])
   return (
-    <AuthContext.Consumer>
+    <globalContext.Consumer>
       {(context) => {
         return (
           <>
@@ -22,7 +30,6 @@ const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMes
                 {subMenu === "create_project" && <CreateProject isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
                 {subMenu === "" && <ProjectsMyProfile isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
                 {subMenu === "applications" && <ApplicationsMyProfile isLoading={isLoading} fetchSuccess={fetchSuccess} fetchMessage={fetchMessage} error={error}/>}
-                {subMenu === "notifications" && <Notifications />}
               </StyledContainer>
             ) : (
               <StyledContainer>
@@ -32,7 +39,7 @@ const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMes
           </>
         );
       }}
-    </AuthContext.Consumer>
+    </globalContext.Consumer>
   );
 };
 

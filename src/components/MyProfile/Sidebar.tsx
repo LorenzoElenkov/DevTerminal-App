@@ -1,16 +1,20 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import { StyledProfileContainer } from "./MyProfile";
 import { StyledProfileCard } from "./MyProfile";
 import Toolbar from "./Toolbar";
 
-import authContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 
-const Sidebar: React.FC<IProps> = ({subMenu}) => {
+const Sidebar: React.FC<IProps> = ({subMenu, submenuHeader}) => {
   const [submenu, setSubmenu] = useState("");
 
-  const context = useContext(authContext);
+  useEffect(() => {
+    setSubmenu(submenuHeader);
+  }, [submenuHeader])
+
+  const context = useContext(globalContext);
   return (
     <>
       <StyledProfileContainer>
@@ -42,4 +46,5 @@ export default Sidebar;
 
 interface IProps {
     subMenu(menu: string): void;
+    submenuHeader: string;
 }

@@ -2,16 +2,20 @@ import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import projectsIcon from "../images/projects.png";
+import projectsPickedIcon from "../images/projectsPicked.png";
 import applicationsIcon from "../images/applications.png";
+import applicationsPickedIcon from "../images/applicationPicked.png";
 import settingsIcon from "../images/settings.png";
-import notificationsIcon from "../images/notifications.png";
+import settingsPickedIcon from "../images/settingsPicked.png";
+import searchIcon from "../images/searchIcon.png";
+import searchPicked from "../images/searchPicked.png";
 import { Link } from "react-router-dom";
 
-import authContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 
 const Toolbar: React.FC<IProps> = ({ submenu, changeMenu }) => {
   const [innerMenu, setInnerMenu] = useState("");
-  const context = useContext(authContext);
+  const context = useContext(globalContext);
   const [notifications, setNotifications] = useState<any>(null);
   const requestBody = {
     query: `
@@ -51,13 +55,29 @@ const Toolbar: React.FC<IProps> = ({ submenu, changeMenu }) => {
 
   useEffect(() => {
     updateNotifications();
-  },[submenu])
-
+  }, [submenu]);
 
   return (
     <StyledContainer>
-      <span>Menu</span>
-      <img src={projectsIcon} alt="" />
+      <img src={submenu === "search" ? searchPicked : searchIcon} alt="" className={submenu === "search" ? "active" : ""}/>
+      <Link
+        to="/search"
+        className={submenu === "search" ? "active" : ""}
+        onClick={() => {
+          changeMenu("search");
+          setInnerMenu("");
+        }}
+      >
+        Search
+      </Link>
+
+      <img
+        src={submenu === "" || submenu.includes("project") ? projectsPickedIcon : projectsIcon}
+        alt=""
+        className={
+          submenu === "" || submenu.includes("project") ? "active" : ""
+        }
+      />
       <button
         className={
           submenu === "" || submenu.includes("project") ? "active" : ""
@@ -86,23 +106,15 @@ const Toolbar: React.FC<IProps> = ({ submenu, changeMenu }) => {
             setInnerMenu("");
           }}
         >
-          View projects
-        </Link>
-      </div>
-      <div className={innerMenu === "projects" ? "open" : "closed"}>
-        <Link
-          to="/search"
-          className="linkSearch"
-          onClick={() => {
-            changeMenu("search_projects");
-            setInnerMenu("");
-          }}
-        >
-          Search
+          My projects
         </Link>
       </div>
 
-      <img src={applicationsIcon} alt="" />
+      <img
+        src={submenu.includes("applications") ? applicationsPickedIcon : applicationsIcon}
+        alt=""
+        className={submenu.includes("applications") ? "active" : ""}
+      />
       <Link
         to="/profile"
         className={submenu.includes("applications") ? "active" : ""}
@@ -114,18 +126,11 @@ const Toolbar: React.FC<IProps> = ({ submenu, changeMenu }) => {
         Applications
       </Link>
 
-      <img src={notificationsIcon} alt="" />
-      <Link
-        to="/profile"
-        className={submenu === "notifications" ? "active" : ""}
-        onClick={() => {
-          changeMenu("notifications");
-          setInnerMenu("");
-        }}
-      >
-        {context.notifications?.filter((x: any) => !x.read).length > 0 && `(${context.notifications?.filter((x: any) => !x.read).length}) `}Notifications
-      </Link>
-      <img src={settingsIcon} alt="" />
+      <img
+        src={submenu === "edit_profile" ? settingsPickedIcon : settingsIcon}
+        alt=""
+        className={submenu === "edit_profile" ? "active" : ""}
+      />
       <Link
         to="/profile"
         className={submenu === "edit_profile" ? "active" : ""}
@@ -150,7 +155,7 @@ interface IProps {
 const StyledContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 6fr;
-  column-gap: 5px;
+  row-gap: 10px;
   margin: 0 20px;
   position: relative;
   grid-column: 3/4;
@@ -177,7 +182,8 @@ const StyledContainer = styled.div`
   }
   & > button,
   a {
-    padding: 10px 0;
+    padding: 5px 0;
+    padding-left: 5px;
   }
   .linkSearch {
     color: black;
@@ -188,9 +194,9 @@ const StyledContainer = styled.div`
     grid-column: 2/2;
     display: flex;
   }
-  div:nth-child(6),
-  div:nth-child(11) {
-    margin-bottom: 10px;
+  div:nth-child(6) {
+    margin-top: -10px;
+    margin-bottom: 20px;
   }
   div > button {
     margin-left: 10px;
@@ -216,22 +222,22 @@ const StyledContainer = styled.div`
   button.active,
   a.active {
     font-weight: 600;
-    border-bottom: 1px solid lightgray;
-    /* width: max-content; */
+    background-color: #e1e1e1;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    color: #6564db;
   }
   & > img {
-    width: 18px;
+    width: 28px;
     justify-self: center;
     align-self: center;
+    padding: 5px;
   }
 
-  /* div {
-        width: 100%;
-        position: absolute;
-        height: 20px;
-        background-color: aliceblue;
-        top: 100%;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-    } */
+  & > img.active {
+    background-color: #e1e1e1;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+
 `;

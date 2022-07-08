@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { StyledFetchModal } from "../../CreateProject/CreateProject";
 
+import io from "socket.io-client";
+
 import searchIcon from "../../images/atIcon.png";
 import passIcon from "../../images/passIcon.png";
 
-import AuthContext from "../../../context/auth-context";
+import { globalContext, socket } from "../../../context/auth-context";
 
 const StyledBackground = styled.div`
   position: fixed;
@@ -141,7 +143,7 @@ const StyledContainer = styled.div<IContainer>`
 `;
 
 const Login: FC<IProps> = ({ close }: IProps) => {
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
 
   const containerRef = useRef<any>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -150,10 +152,6 @@ const Login: FC<IProps> = ({ close }: IProps) => {
   const [emailValue, setEmailValue] = useState("");
   const [passValue, setPassValue] = useState("");
   const [error, setError] = useState("");
-
-  
-
-
 
   const navigate = useNavigate();
 
@@ -201,6 +199,7 @@ const Login: FC<IProps> = ({ close }: IProps) => {
                       read
                       message
                     }
+                    rooms
                 }
             }
         `,
@@ -224,21 +223,27 @@ const Login: FC<IProps> = ({ close }: IProps) => {
         if (resData.errors) {
           setError(resData.errors[0].message);
         } else if (resData.data.login.token) {
-          context.login(
-            resData.data.login.token,
-            resData.data.login.userId,
-            resData.data.login.nickname,
-            resData.data.login.email,
-            resData.data.login.bio,
-            resData.data.login.role,
-            resData.data.login.skills,
-            resData.data.login.avatarIcon,
-            resData.data.login.avatarIconColor,
-            resData.data.login.avatarBackground,
-            resData.data.login.notifications,
-          );
-          close("");
-          navigate("/profile");
+          socket.connect();
+          socket.on("connect", () => {
+            socket.emit("send_online_status", {user: resData.data.login.userId, socketId: socket.id});
+            context.login(
+              resData.data.login.token,
+              resData.data.login.userId,
+              resData.data.login.nickname,
+              resData.data.login.email,
+              resData.data.login.bio,
+              resData.data.login.role,
+              resData.data.login.skills,
+              resData.data.login.avatarIcon,
+              resData.data.login.avatarIconColor,
+              resData.data.login.avatarBackground,
+              resData.data.login.notifications,
+              resData.data.login.rooms,
+              socket.id
+            );
+            close("");
+            navigate("/profile");
+          });
         }
       })
       .catch((err) => {

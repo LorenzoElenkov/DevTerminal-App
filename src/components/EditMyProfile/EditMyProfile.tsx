@@ -4,8 +4,9 @@ import styled from "styled-components";
 import Select from "react-select";
 import { CirclePicker } from "react-color";
 
-import AuthContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 import UpdatePassword from "./UpdatePassword";
+import Notifications from "../Notifications/Notifications";
 
 // NEED TO CLEAN THIS ENTIRE COMPONENT A BIT, PERHAPS BREAK IT DOWN TOO!
 
@@ -28,7 +29,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
 
   const [changingPassword, setChangingPassword] = useState<boolean>(false);
 
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
 
   const requestBody = {
     query: `
@@ -98,7 +99,8 @@ const EditMyProfile: React.FC<IProps> = (props) => {
             firstName + " " + lastName,
             avatarImage,
             avatarInvert,
-            avatarColor
+            avatarColor,
+            [...context.notifications]
           );
           setHasUpdated(true);
           props.fetchSuccess(true);
@@ -147,6 +149,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
         avatarIcon: context.avatarIcon,
         avatarIconColor: context.avatarIconColor,
         avatarBackground: context.avatarBackground,
+        notifications: context.notifications,
       });
       setFirstName(context.nickname?.split(" ")[0]);
       setLastName(context.nickname.split(" ")[1]);
@@ -221,7 +224,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
   };
 
   return (
-    <AuthContext.Consumer>
+    <globalContext.Consumer>
       {(context) => {
         return (
           <StyledContainer>
@@ -365,7 +368,7 @@ const EditMyProfile: React.FC<IProps> = (props) => {
           </StyledContainer>
         );
       }}
-    </AuthContext.Consumer>
+    </globalContext.Consumer>
   );
 };
 
@@ -478,6 +481,22 @@ export const StyledContainer = styled.div`
   gap: 20px;
   width: 850px;
   margin-top: 100px;
+
+  &.viewProject {
+    margin-top: 20px;
+    padding: 0 20px;
+    width: 100%;
+  }
+
+  .details {
+    display: flex;
+    gap: 20px;
+  }
+
+  .members_chat {
+    display: flex;
+    gap: 20px;
+  }
 `;
 
 export const StyledTopBar = styled.div`

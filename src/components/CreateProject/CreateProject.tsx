@@ -2,16 +2,18 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import styled from "styled-components";
-import AuthContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 
 const CreateProject: React.FC<IProps> = (props) => {
   const titleRef = useRef<any>();
   const descriptionRef = useRef<any>();
+  const myRoleRef = useRef<any>();
   const rolesRef = useRef<any>();
   const levelRef = useRef<any>();
   const stacksRef = useRef<any>();
   const timezoneRef = useRef<any>();
 
+  const [myRole, setMyRole] = useState<string>("");
   const [roleValues, setRolesValues] = useState<String[]>([]);
   const [levelValues, setLevelValues] = useState<String[]>([]);
   const [stackValues, setStackValues] = useState<String[]>([]);
@@ -21,7 +23,7 @@ const CreateProject: React.FC<IProps> = (props) => {
   const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
   const [error, setError] = useState<String>("");
 
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
 
   
   const requestBody = {
@@ -42,10 +44,10 @@ const CreateProject: React.FC<IProps> = (props) => {
                     timezone: [${timezoneValues.map((x) => {
                       return '"' + x + '",';
                     })}],
-                    user: "${context.userId}"
+                    user: "${context.userId}",
+                    role: "${myRole}"
                 }) {
                     _id
-                    roles
                     level
                     stacks
                     timezone
@@ -106,6 +108,8 @@ const CreateProject: React.FC<IProps> = (props) => {
         rawData.push(el[i].value);
       }
       setLevelValues(rawData);
+    } else if (state === "myRole") {
+      setMyRole(el.value);
     } else if (state === "roles") {
       for (let i = 0; i < el.length; i++) {
         rawData.push(el[i].value);
@@ -132,7 +136,19 @@ const CreateProject: React.FC<IProps> = (props) => {
       <input className="title" type="text" ref={titleRef} />
       <label className="descLabel">Description:</label>
       <input className="description" type="text" ref={descriptionRef} />
-      <label className="rolesLabel">Roles:</label>
+      <label className="myroleLabel">My role:</label>
+      <CreatableSelect
+        ref={myRoleRef}
+        className="myRole"
+        onChange={(el) => changeHandler(el, "myRole")}
+        styles={customStyles2}
+        placeholder={"Type your role and hit ENTER to add..."}
+        components={{
+          DropdownIndicator: () => null,
+          IndicatorSeparator: () => null,
+        }}
+      />
+      <label className="rolesLabel">Looking for roles:</label>
       <CreatableSelect
         ref={rolesRef}
         isMulti
@@ -377,26 +393,29 @@ const StyledContainer = styled.div`
   .descLabel {
     grid-column: 1/3;
   }
-  .rolesLabel,
-  .stacksLabel,
-  .roles,
-  .stacks {
-    grid-column: 1/1;
-  }
+  .myroleLabel,
   .levelsLabel,
   .timezonesLabel,
-  .levels,
-  .timezones {
+  .timezones,
+  .myRole,
+  .levels {
+    grid-column: 1/1;
+  }
+  
+  .stacksLabel,
+  .stacks,
+  .rolesLabel,
+  .roles {
     grid-column: 2/2;
   }
 
-  .rolesLabel,
-  .levelsLabel {
+  .myroleLabel,
+  .rolesLabel {
     grid-row: 6/6;
     margin-top: 20px;
   }
   .stacksLabel,
-  .timezonesLabel {
+  .levelsLabel {
     grid-row: 8/8;
   }
 
@@ -423,8 +442,9 @@ const StyledContainer = styled.div`
     border: none;
     border-radius: 15px;
     margin-top: 30px;
-    grid-column: 1/3;
+    grid-column: 2/2;
     justify-self: end;
+    grid-row: 11/11;
   }
   .containerLabel {
       margin-bottom: 20px;

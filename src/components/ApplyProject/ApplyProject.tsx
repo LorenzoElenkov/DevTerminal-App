@@ -5,12 +5,12 @@ import styled, { keyframes } from "styled-components";
 import { StyledSearchResult } from "../Inside/SearchPage/SearchPage";
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import applicantsIcon from "../images/applicants.png";
-import authContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 import ReactSelect from "react-select";
 import membersIcon from "../images/members.png";
 
 const ApplyProject: React.FC<IProps> = (props) => {
-  const context = useContext(authContext);
+  const context = useContext(globalContext);
   const backdropRef = useRef(null);
 
   const roleSelectRef = useRef<any>(null);
@@ -27,7 +27,7 @@ const ApplyProject: React.FC<IProps> = (props) => {
   useEffect(() => {
     roleOptions.length = 0;
     props.data.roles.map((x: any) => {
-      return roleOptions.push({ value: x, label: x });
+      return roleOptions.push({ value: x.role, label: x.role });
     });
   }, []);
 
@@ -53,8 +53,8 @@ const ApplyProject: React.FC<IProps> = (props) => {
           <div className="wrapper">
             {props.data.roles.map((ele: any, idxx: number) => {
               return (
-                <span key={idxx} className="timezoneBox">
-                  {ele}
+                <span key={idxx} className={ele.taken ? "timezoneBox taken" : "timezoneBox"}>
+                  {ele.role}
                 </span>
               );
             })}

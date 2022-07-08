@@ -5,7 +5,7 @@ import searchIcon from "../../images/searchIcon.png";
 import applicantsIcon from "../../images/applicants.png";
 import membersIcon from "../../images/members.png";
 
-import authContext from "../../../context/auth-context";
+import { globalContext, socket } from "../../../context/auth-context";
 
 import Select from "react-select";
 
@@ -62,6 +62,8 @@ const SearchPage: React.FC<IProps> = (props) => {
 
   const [applyProjectID, setApplyProjectID] = useState<string[]>([]);
 
+  const [exactMatch, setExactMatch] = useState<boolean>(false);
+
   const [roleSearch, setRoleSearch] = useState<any>("");
   const [windowX, setWindowX] = useState<number | null>(null);
   const [filtersAdded, setFiltersAdded] = useState<number>(0);
@@ -74,7 +76,7 @@ const SearchPage: React.FC<IProps> = (props) => {
 
   const [stacksOptions, setStacksOptions] = useState<any>([]);
 
-  const context = useContext(authContext);
+  const context = useContext(globalContext);
   const [fetchedProjects, setFetchedProjects] = useState<any>(null);
   const [projectsQueryCount, setProjectsQueryCount] = useState<number>(0);
   const [queryPages, setQueryPages] = useState<number[]>([]);
@@ -190,7 +192,8 @@ const SearchPage: React.FC<IProps> = (props) => {
                   })}],
                   applicants: [${filterApplicants.map((x: any) => {
                     return '"' + x + '",';
-                  })}]
+                  })}],
+                  exactMatch: ${exactMatch}
             })
         }  
     `,
@@ -213,6 +216,7 @@ const SearchPage: React.FC<IProps> = (props) => {
                     applicants: [${filterApplicants.map((x: any) => {
                       return '"' + x + '",';
                     })}],
+                    exactMatch: ${exactMatch}
                     sortBy: ${sortBy},
                     resultsPerPage: ${resultsPerPage},
                     currentPage: ${currentPage}
@@ -220,7 +224,10 @@ const SearchPage: React.FC<IProps> = (props) => {
                     _id
                     title
                     description
-                    roles
+                    roles {
+                      role
+                      taken
+                    }
                     level
                     stacks
                     timezone
@@ -233,7 +240,10 @@ const SearchPage: React.FC<IProps> = (props) => {
                     }
                     applicantsCount
                     members {
-                      _id
+                      user {
+                        _id
+                      }
+                      role
                     }
                 }
             }
@@ -289,9 +299,11 @@ const SearchPage: React.FC<IProps> = (props) => {
           props.fetchSuccess(true);
           props.fetchMessage("Results are fetched!");
           setIsLoading(false);
+          console.log(data.data.projects);
           setFetchedProjects(data.data.projects);
         } else {
           props.error(data.errors[0].message);
+          console.log(data.errors[0].message);
         }
         setTimeout(() => {
           props.isLoading(false);
@@ -370,6 +382,10 @@ const SearchPage: React.FC<IProps> = (props) => {
             value={roleSearch}
           />
           <button onClick={() => fetchSearchProjects()}>Search</button>
+          <label>
+            <input type="checkbox" checked={exactMatch} onChange={() => setExactMatch(!exactMatch)} className="checkboxRegex"/>
+            <span>Exact match?</span>
+          </label>
         </StyledSearchField>
         <StyledSearchResultsContainer>
           {fetchedProjects?.length === 0 && <span className="noResults">No results found</span>}
@@ -391,12 +407,13 @@ const SearchPage: React.FC<IProps> = (props) => {
                         <span
                           key={idxx}
                           className={
-                            roleSearch.includes(ele)
+                            roleSearch.includes(ele.role) && !ele.taken
                               ? "timezoneBox yourRole"
-                              : "timezoneBox"
+                              : (roleSearch.includes(ele.role) && ele.taken) ? 
+                              "timezoneBox taken yourRole" : (!roleSearch.includes(ele.role) && !ele.taken) ? "timezoneBox" : (!roleSearch.includes(ele.role) && ele.taken) && "timezoneBox taken"
                           }
                         >
-                          {ele}
+                          {ele.role}
                         </span>
                       );
                     })}
@@ -1080,7 +1097,7 @@ const StyledSearchField = styled.div`
     position: relative;
     grid-column: 1/2;
   }
-  & > label:before {
+  & > label:not(:last-child):before {
     content: "";
     position: absolute;
     background: url(${searchIcon});
@@ -1091,6 +1108,20 @@ const StyledSearchField = styled.div`
     top: 20px;
     left: 10px;
   }
+
+  & > label:last-child {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    input {
+      transform: scale(1.2, 1.2);
+      accent-color: #6f3fff;
+    }
+    span {
+      font-size: 1.2rem;
+    }
+  }
+
   & > input {
     grid-column: 1/2;
     font-size: 1.6rem;
@@ -1284,6 +1315,15 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     .yourRole {
       background: #0eff97;
       color: black;
+    }
+    .taken {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+    .timezoneBox.yourRole.taken {
+      background: #0eff97;
+      text-decoration: line-through;
+      opacity: 0.5;
     }
     .yourStack {
       background: #54c3ff;

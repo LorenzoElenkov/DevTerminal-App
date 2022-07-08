@@ -1,8 +1,8 @@
 import React, { useContext, useRef, useState } from "react";
-import AuthContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 
 const UpdatePassword: React.FC<IProps> = ({ setUpdate, setError }) => {
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
 
   const [oldPass, setOldPass] = useState<string>('');
   const [newPass, setNewPass] = useState<string>('');

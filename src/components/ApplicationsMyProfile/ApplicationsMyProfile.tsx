@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyledTopBar } from "../EditMyProfile/EditMyProfile";
 import { StyledContainer } from "../ProjectsMyProfile/ProjectsMyProfile";
-import authContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 import ReactSelect from "react-select";
 import styled from "styled-components";
 import {
@@ -21,7 +21,7 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   const [fetchMessage, setFetchMessage] = useState("");
   const [error, setError] = useState("");
 
-  const context = useContext(authContext);
+  const context = useContext(globalContext);
 
   const requestBody = {
     query: `
@@ -35,9 +35,15 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
                             _id
                             title
                             description
-                            roles
+                            roles {
+                              role
+                              taken
+                            }
                             members {
-                                _id
+                                user {
+                                  _id
+                                }
+                                role
                             }
                             applicantsCount
                             author {
@@ -186,17 +192,6 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
                     <span>members</span>
                   </span>
                 </div>
-                <button
-                  className="applyButton"
-                  onClick={() => {
-                    // setApplyProjectID(el._id);
-                    // setClickedProject({
-                    //   ...el,
-                    // });
-                  }}
-                >
-                  View
-                </button>
               </div>
             </StyledApplicationResult>
           );
@@ -296,7 +291,8 @@ const StyledApplicationResult = styled.div<IPropsApplication>`
 
   .details {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    gap: 10%;
   }
   .author {
     margin-top: 15px;

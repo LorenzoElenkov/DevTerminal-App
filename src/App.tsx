@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Header from "./components/Header/Header";
 import Login from "./components/Login/Signup/Login";
 import Signup from "./components/Login/Signup/Signup";
@@ -7,11 +7,12 @@ import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 
-import AuthContext from "./context/auth-context";
+import { globalContext, socket } from "./context/auth-context";
 import SearchPage from "./components/Inside/SearchPage/SearchPage";
 import MyProfile from "./components/MyProfile/MyProfile";
 import Sidebar from "./components/MyProfile/Sidebar";
 import { StyledFetchModal } from "./components/CreateProject/CreateProject";
+import { Socket } from "socket.io-client";
 
 function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -19,8 +20,15 @@ function App() {
   const [fetchMessage,setFetchMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
 
+  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+
   const [authModal, setAuthModal] = useState("");
   const [submenu, setSubmenu] = useState("");
+
+  const handleNotifications = (state: boolean) => {
+    setNotificationsOpen(state);
+  }
+
   const [userMetaData, setUserMetaData] = useState<any>({
     token: "",
     userId: "",
@@ -32,6 +40,9 @@ function App() {
     avatarIcon: 0,
     avatarIconColor: "",
     avatarBackground: "",
+    notifications: [],
+    rooms: [],
+    socketId: "",
   });
 
   const login = (
@@ -46,6 +57,8 @@ function App() {
     avatarIconColor: string,
     avatarBackground: string,
     notifications: Object[],
+    rooms: string[],
+    socketId: string,
   ) => {
     setUserMetaData({
       token: token,
@@ -58,7 +71,9 @@ function App() {
       avatarIcon: avatarIcon,
       avatarIconColor: avatarIconColor,
       avatarBackground: avatarBackground,
-      notifications: notifications
+      notifications: notifications,
+      rooms: rooms,
+      socketId: socketId,
     });
   };
 
@@ -74,6 +89,9 @@ function App() {
       avatarIconColor: "",
       avatarBackground: "",
       stacks: [],
+      notifications: [],
+      rooms: [],
+      socketId: "",
     });
     setSubmenu("");
   };
@@ -96,6 +114,8 @@ function App() {
     avatarIconColor: string,
     avatarBackground: string,
     notifications: Object[],
+    rooms: string[],
+    socketId: string,
   ) => {
     setUserMetaData((prevState: any) => {
       return {
@@ -108,6 +128,8 @@ function App() {
         avatarIconColor: avatarIconColor,
         avatarBackground: avatarBackground,
         notifications: notifications,
+        rooms: rooms,
+        socketId: socketId,
       };
     });
   };
@@ -122,7 +144,7 @@ function App() {
   }
   return (
     <BrowserRouter>
-      <AuthContext.Provider
+      <globalContext.Provider
         value={{
           token: userMetaData.token,
           userId: userMetaData.userId,
@@ -135,6 +157,8 @@ function App() {
           avatarIconColor: userMetaData.avatarIconColor,
           avatarBackground: userMetaData.avatarBackground,
           notifications: userMetaData.notifications,
+          rooms: userMetaData.rooms,
+          socketId: userMetaData.socketId,
           login: login,
           logout: logout,
           setNickname: setNickname,
@@ -142,12 +166,12 @@ function App() {
           updateNotifications: updateNotifications,
         }}
       >
-        <Header loginSignup={setAuthModal} logout={logout} />
+        <Header loginSignup={setAuthModal} logout={logout} setNotifications={(state) => handleNotifications(state)} notificationsOpen={notificationsOpen} profileClick={() => setSubmenu("edit_profile")}/>
         <main>
-          {userMetaData.userId !== "" && <Sidebar subMenu={setSubmenu} />}
+          {userMetaData.userId !== "" && <Sidebar subMenu={setSubmenu} submenuHeader={submenu}/>}
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/search" element={<SearchPage isLoading={setIsLoading} fetchMessage={setFetchMessage} fetchSuccess={setFetchSuccess} error={setError}/>} />
+            <Route path="/search" element={<SearchPage isLoading={setIsLoading} fetchMessage={setFetchMessage} fetchSuccess={setFetchSuccess} error={setError} />} />
             <Route path="/profile" element={<MyProfile subMenu={submenu} isLoading={setIsLoading} fetchMessage={setFetchMessage} fetchSuccess={setFetchSuccess} error={setError}/>} />
           </Routes>
         </main>
@@ -171,7 +195,7 @@ function App() {
             {error}
           </StyledFetchModal>
         )}
-      </AuthContext.Provider>
+      </globalContext.Provider>
     </BrowserRouter>
   );
 }

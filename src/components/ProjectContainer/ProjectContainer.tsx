@@ -4,7 +4,7 @@ import styled from "styled-components";
 import applicantsIcon from "../images/applicants.png";
 import authorAvatar from "../images/authorAvatar.png";
 
-import AuthContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 
 const ProjectContainer: React.FC<IProps> = ({
   _id,
@@ -18,9 +18,9 @@ const ProjectContainer: React.FC<IProps> = ({
   // applicants,
   applicantsCount
 }) => {
-  const context = useContext(AuthContext);
+  const context = useContext(globalContext);
   return (
-    <AuthContext.Consumer>
+    <globalContext.Consumer>
       {(context) => {
         return (
           <StyledSearchResult>
@@ -49,7 +49,7 @@ const ProjectContainer: React.FC<IProps> = ({
           </StyledSearchResult>
         );
       }}
-    </AuthContext.Consumer>
+    </globalContext.Consumer>
   );
 };
 

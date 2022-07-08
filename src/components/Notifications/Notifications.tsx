@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import styled from "styled-components";
-import authContext from "../../context/auth-context";
+import { globalContext, socket } from "../../context/auth-context";
 import { StyledTopBar } from "../EditMyProfile/EditMyProfile";
 import { StyledContainer } from "../ProjectsMyProfile/ProjectsMyProfile";
 
 const Notifications = () => {
-  const context = useContext(authContext);
+  const context = useContext(globalContext);
   const [notifics, setNotifications] = useState<Object[] | null>(null);
 
   const filterUnread = context.notifications.filter(
