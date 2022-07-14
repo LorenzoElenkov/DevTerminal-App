@@ -9,16 +9,17 @@ import searchIcon from "../images/searchIcon.png";
 import notificationsIcon from "../images/notifications.png";
 import profileIcon from "../images/profile.png";
 
-
 const Header: React.FC<IProps> = ({
   loginSignup,
   logout,
   notificationsOpen,
   setNotifications,
-  profileClick
-}: IProps) => {
+}: // profileClick
+IProps) => {
   const context = useContext(globalContext);
-  const [notificationsArray, setNotificationsArray] = useState<Object[] | null>(null);
+  const [notificationsArray, setNotificationsArray] = useState<Object[] | null>(
+    null
+  );
 
   const notificationWindowRef = useRef(null);
 
@@ -40,15 +41,16 @@ const Header: React.FC<IProps> = ({
     let timeDiff = Math.abs(dateNow - timeNumber) / 1000;
     const diffHours = Math.floor(timeDiff / 3600) % 24;
     const diffMinutes = Math.floor(timeDiff / 60) % 60;
-    return (diffHours === 0 && diffMinutes === 0) && (timeDiff / 86400 <= 0)
+    return diffHours === 0 && diffMinutes === 0 && timeDiff / 86400 <= 0
       ? "now"
-      : (diffHours === 0 && diffMinutes === 1) && (timeDiff / 86400 <= 0)
+      : diffHours === 0 && diffMinutes === 1 && timeDiff / 86400 <= 0
       ? `${diffMinutes} min ago`
-      : (diffHours === 0 && diffMinutes > 1) && (timeDiff / 86400 <= 0)
+      : diffHours === 0 && diffMinutes > 1 && timeDiff / 86400 <= 0
       ? `${diffMinutes} mins ago`
-      : (diffHours > 0 && diffHours < 24) && (timeDiff / 86400 <= 0)
+      : diffHours > 0 && diffHours < 24 && timeDiff / 86400 <= 0
       ? `${diffHours} hrs ago`
-      : (timeDiff / 86400 > 0) && `${timePosted[2]} ${timePosted[1]} ${timePosted[3]}`;
+      : timeDiff / 86400 > 0 &&
+        `${timePosted[2]} ${timePosted[1]} ${timePosted[3]}`;
   };
 
   const requestBody = {
@@ -165,23 +167,59 @@ const Header: React.FC<IProps> = ({
                   )}
                   {notificationsOpen && (
                     <StyledNotificationWindow onClick={(e) => handleClickIn(e)}>
-                      {context.notifications.length > 0 && <p className="markRead">Click on notification to mark as read</p>}
-                      {context.notifications.length === 0 && <p className="noNotifications">Yuck!<br/> No notifications here</p>}
+                      {context.notifications.length > 0 && (
+                        <p className="markRead">
+                          Click on notification to mark as read
+                        </p>
+                      )}
+                      {context.notifications.length === 0 && (
+                        <p className="noNotifications">
+                          Yuck!
+                          <br /> No notifications here
+                        </p>
+                      )}
                       {context.notifications.map((el: any, idx: number) => {
                         return (
-                          <StyledNotificationSingle key={idx} read={el.read} onClick={() => updateNotificationsRead(idx)}>
+                          <StyledNotificationSingle
+                            key={idx}
+                            read={el.read}
+                            onClick={() => updateNotificationsRead(idx)}
+                          >
                             <p className="message">{el.message}</p>
                             <p className="time">
                               {formatCreatedAt(el.createdAt)}
                             </p>
-                            {el.read && <button className="delete" onClick={() => updateNotificationDelete(idx)}>X</button>}
+                            {el.read && (
+                              <button
+                                className="delete"
+                                onClick={() => updateNotificationDelete(idx)}
+                              >
+                                X
+                              </button>
+                            )}
                           </StyledNotificationSingle>
                         );
                       })}
                     </StyledNotificationWindow>
                   )}
                 </StyledButton>
-                <Link to="/profile" className="profile" onClick={() => profileClick()}/>
+                <Link
+                  to={'/myprofile/' + context.userId}
+                  className="profile"
+                  onClick={() => {
+                    context.setBrowsingUser({
+                      _id: context.userId,
+                      stacks: context.stacks,
+                      bio: context.bio,
+                      role: context.role,
+                      nickname: context.nickname,
+                      avatarIcon: context.avatarIcon,
+                      avatarIconColor: context.avatarIconColor,
+                      avatarBackground: context.avatarBackground,
+                      github: context.github,
+                    });
+                  }}
+                />
                 <StyledButton column="10" onClick={signOut}>
                   Sign out
                 </StyledButton>
@@ -201,7 +239,7 @@ interface IProps {
   logout(): void;
   notificationsOpen: boolean;
   setNotifications(state: boolean): void;
-  profileClick(): void;
+  // profileClick?(): void;
 }
 
 interface IButtonProps {

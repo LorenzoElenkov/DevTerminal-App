@@ -1,17 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyledTopBar } from "../EditMyProfile/EditMyProfile";
 import { StyledContainer } from "../ProjectsMyProfile/ProjectsMyProfile";
-import { globalContext, socket } from "../../context/auth-context";
+import { globalContext } from "../../context/auth-context";
 import ReactSelect from "react-select";
 import styled from "styled-components";
-import {
-  StyledSearchResult,
-  StyledSearchResultsContainer,
-} from "../Inside/SearchPage/SearchPage";
 
 import applicantsIcon from "../images/applicants.png";
 import membersIcon from "../images/members.png";
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
+import { Link } from "react-router-dom";
 
 const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   const [projectsToPrint, setProjectsToPrint] = useState<any>([]);
@@ -52,6 +49,10 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
                                 avatarIcon
                                 avatarIconColor
                                 avatarBackground
+                                bio
+                                role
+                                skills
+                                github
                             }
                         }
                     }
@@ -143,11 +144,6 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
       <div className="projectsContainer">
         {projectsToPrint.map((el: any, idx: number) => {
           return (
-            // <StyledSearchResult
-            //   key={idx}
-            //   backgroundColor={el.author.avatarBackground}
-            //   iconColor={el.author.avatarIconColor}
-            // ></StyledSearchResult>
             <StyledApplicationResult
               key={idx}
               state={el.currentState}
@@ -164,15 +160,36 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
               <span>{el.project.description}</span>
               <div className="divider" />
               <div className="details">
-                <div className="author">
-                  <div className="avatarBackground" />
-                  <img src={avatarIcons[el.project.author.avatarIcon]} alt="" />
-                  <span className="authorName">
-                    {el.project.author.nickname === context.nickname
-                      ? "You"
-                      : el.project.author.nickname}
-                  </span>
-                </div>
+                <Link
+                  to={"/myprofile/" + el.project.author._id}
+                  className="profile"
+                  onClick={() => {
+                    context.setBrowsingUser({
+                      _id: el.project.author._id,
+                      stacks: el.project.author.skills,
+                      bio: el.project.author.bio,
+                      role: el.project.author.role,
+                      nickname: el.project.author.nickname,
+                      avatarIcon: el.project.author.avatarIcon,
+                      avatarIconColor: el.project.author.avatarIconColor,
+                      avatarBackground: el.project.author.avatarBackground,
+                      github: el.project.author.github,
+                    });
+                  }}
+                >
+                  <div className="author">
+                    <div className="avatarBackground" />
+                    <img
+                      src={avatarIcons[el.project.author.avatarIcon]}
+                      alt=""
+                    />
+                    <span className="authorName">
+                      {el.project.author.nickname === context.nickname
+                        ? "You"
+                        : el.project.author.nickname}
+                    </span>
+                  </div>
+                </Link>
                 <div className="applicants">
                   <img src={applicantsIcon} alt="" />
                   <span className="applicantsNumber">
@@ -293,6 +310,10 @@ const StyledApplicationResult = styled.div<IPropsApplication>`
     display: flex;
     /* justify-content: space-between; */
     gap: 10%;
+  }
+  .profile {
+    text-decoration: none;
+    color: black;
   }
   .author {
     margin-top: 15px;

@@ -8,6 +8,7 @@ import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import applicantsIcon from "../images/applicants.png";
 import membersIcon from "../images/members.png";
 import ViewCreatedProject from "../ViewCreatedProject/ViewCreatedProject";
+import { Link } from "react-router-dom";
 
 const ProjectsMyProfile: React.FC<IProps> = (props) => {
   const context = useContext(globalContext);
@@ -19,7 +20,10 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
   const [fetchMessage, setFetchMessage] = useState("");
   const [error, setError] = useState("");
 
-  const [filterOption, setFilterOption] = useState<any>({value: "Created", label: "Created"});
+  const [filterOption, setFilterOption] = useState<any>({
+    value: "Created",
+    label: "Created",
+  });
 
   const [clickedProject, setClickedProject] = useState<any>(undefined);
   const [innerMenu, setInnerMenu] = useState<string>("project");
@@ -45,6 +49,10 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       avatarIconColor
                       avatarBackground
                       nickname
+                      role
+                      skills
+                      github
+                      bio
                     }
                     applicants {
                       _id
@@ -91,6 +99,10 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       avatarIconColor
                       avatarBackground
                       nickname
+                      role
+                      skills
+                      github
+                      bio
                     }
                     applicants {
                       _id
@@ -138,6 +150,10 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                         avatarIconColor
                         avatarBackground
                         nickname
+                        role
+                        skills
+                        github
+                        bio
                       }
                       applicantsCount
                       members {
@@ -204,7 +220,7 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
 
   useEffect(() => {
     if (projectsFetched !== null) {
-      changeProjectsFilter({value: filterOption.value});
+      changeProjectsFilter({ value: filterOption.value });
     }
   }, [projectsFetched]);
 
@@ -216,16 +232,16 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
 
   const changeProjectsFilter = (e: any) => {
     if (e.value === "Created") {
-      setFilterOption({value: "Created", label: "Created"});
+      setFilterOption({ value: "Created", label: "Created" });
       setProjectsToPrint(projectsFetched.createdProjects);
     } else if (e.value === "Partaking") {
-      setFilterOption({value: "Partaking", label: "Partaking"});
+      setFilterOption({ value: "Partaking", label: "Partaking" });
       let filteredProjects = projectsFetched.inProjects.filter(
         (x: any) => x.author._id !== context.userId
       );
       setProjectsToPrint(filteredProjects);
     } else if (e.value === "Applied for") {
-      setFilterOption({value: "Applied for", label: "Applied for"});
+      setFilterOption({ value: "Applied for", label: "Applied for" });
       const appliedProjects = projectsFetched.appliedProjects.map(
         (x: any) => x.project
       );
@@ -276,7 +292,12 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       <div className="wrapper">
                         {el.roles.map((ele: any, idxx: number) => {
                           return (
-                            <span key={idxx} className={ele.taken ? "timezoneBox taken" : "timezoneBox"}>
+                            <span
+                              key={idxx}
+                              className={
+                                ele.taken ? "timezoneBox taken" : "timezoneBox"
+                              }
+                            >
                               {ele.role}
                             </span>
                           );
@@ -311,15 +332,33 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       </div>
                     </div>
                     <span className="divider"></span>
-                    <div className="author">
-                      <div className="avatarBackground" />
-                      <img src={avatarIcons[el.author.avatarIcon]} alt="" />
-                      <span className="authorName">
-                        {el.author.nickname === context.nickname
-                          ? "You"
-                          : el.author.nickname}
-                      </span>
-                    </div>
+                    <Link
+                      to={"/myprofile/" + el.author._id}
+                      className="profile"
+                      onClick={() => {
+                        context.setBrowsingUser({
+                          _id: el.author._id,
+                          stacks: el.author.skills,
+                          bio: el.author.bio,
+                          role: el.author.role,
+                          nickname: el.author.nickname,
+                          avatarIcon: el.author.avatarIcon,
+                          avatarIconColor: el.author.avatarIconColor,
+                          avatarBackground: el.author.avatarBackground,
+                          github: el.author.github,
+                        });
+                      }}
+                    >
+                      <div className="author">
+                        <div className="avatarBackground" />
+                        <img src={avatarIcons[el.author.avatarIcon]} alt="" />
+                        <span className="authorName">
+                          {el.author.nickname === context.nickname
+                            ? "You"
+                            : el.author.nickname}
+                        </span>
+                      </div>
+                    </Link>
                     <div className="applicants">
                       <img src={applicantsIcon} alt="" />
                       <span className="applicantsNumber">

@@ -12,12 +12,14 @@ import SearchPage from "./components/Inside/SearchPage/SearchPage";
 import MyProfile from "./components/MyProfile/MyProfile";
 import Sidebar from "./components/MyProfile/Sidebar";
 import { StyledFetchModal } from "./components/CreateProject/CreateProject";
+import ProfilePage from "./components/ProfilePage/ProfilePage";
+import ProfileChats from "./components/Chats/ProfileChats";
 
 function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [fetchSuccess,setFetchSuccess] = useState<boolean>(false);
-  const [fetchMessage,setFetchMessage] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
+  const [fetchMessage, setFetchMessage] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
 
@@ -26,7 +28,7 @@ function App() {
 
   const handleNotifications = (state: boolean) => {
     setNotificationsOpen(state);
-  }
+  };
 
   const [userMetaData, setUserMetaData] = useState<any>({
     token: "",
@@ -43,6 +45,7 @@ function App() {
     rooms: [],
     github: "",
     socketId: "",
+    browsingUser: null,
   });
 
   const login = (
@@ -59,7 +62,7 @@ function App() {
     notifications: Object[],
     rooms: string[],
     github: string,
-    socketId: string,
+    socketId: string
   ) => {
     setUserMetaData({
       token: token,
@@ -119,7 +122,7 @@ function App() {
     notifications: Object[],
     rooms: string[],
     github: string,
-    socketId: string,
+    socketId: string
   ) => {
     setUserMetaData((prevState: any) => {
       return {
@@ -143,10 +146,19 @@ function App() {
     setUserMetaData((prevState: any) => {
       return {
         ...prevState,
-        notifications: notifications
-      }
-    })
-  }
+        notifications: notifications,
+      };
+    });
+  };
+
+  const setBrowsingUser = (userData: Object[]) => {
+    setUserMetaData((prevState: any) => {
+      return {
+        ...prevState,
+        browsingUser: userData,
+      };
+    });
+  };
   return (
     <BrowserRouter>
       <globalContext.Provider
@@ -165,20 +177,68 @@ function App() {
           rooms: userMetaData.rooms,
           github: userMetaData.github,
           socketId: userMetaData.socketId,
+          browsingUser: userMetaData.browsingUser,
           login: login,
           logout: logout,
           setNickname: setNickname,
           updateUser: updateUser,
           updateNotifications: updateNotifications,
+          setBrowsingUser: setBrowsingUser,
         }}
       >
-        <Header loginSignup={setAuthModal} logout={logout} setNotifications={(state) => handleNotifications(state)} notificationsOpen={notificationsOpen} profileClick={() => setSubmenu("edit_profile")}/>
+        <Header
+          loginSignup={setAuthModal}
+          logout={logout}
+          setNotifications={(state) => handleNotifications(state)}
+          notificationsOpen={notificationsOpen}
+          // profileClick={() => setSubmenu("edit_profile")}
+        />
         <main>
-          {userMetaData.userId !== "" && <Sidebar subMenu={setSubmenu} submenuHeader={submenu}/>}
+          {userMetaData.userId !== "" && (
+            <Sidebar subMenu={setSubmenu} submenuHeader={submenu} />
+          )}
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/search" element={<SearchPage isLoading={setIsLoading} fetchMessage={setFetchMessage} fetchSuccess={setFetchSuccess} error={setError} />} />
-            <Route path="/profile" element={<MyProfile subMenu={submenu} isLoading={setIsLoading} fetchMessage={setFetchMessage} fetchSuccess={setFetchSuccess} error={setError}/>} />
+            <Route
+              path="/search"
+              element={
+                <SearchPage
+                  isLoading={setIsLoading}
+                  fetchMessage={setFetchMessage}
+                  fetchSuccess={setFetchSuccess}
+                  error={setError}
+                />
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <MyProfile
+                  subMenu={submenu}
+                  isLoading={setIsLoading}
+                  fetchMessage={setFetchMessage}
+                  fetchSuccess={setFetchSuccess}
+                  error={setError}
+                />
+              }
+            />
+            <Route
+              path="/myprofile/:id"
+              element={
+                <ProfilePage
+                  _id={userMetaData.browsingUser?._id}
+                  stacks={userMetaData.browsingUser?.stacks}
+                  bio={userMetaData.browsingUser?.bio}
+                  role={userMetaData.browsingUser?.role}
+                  nickname={userMetaData.browsingUser?.nickname}
+                  avatarIcon={userMetaData.browsingUser?.avatarIcon}
+                  avatarIconColor={userMetaData.browsingUser?.avatarIconColor}
+                  avatarBackground={userMetaData.browsingUser?.avatarBackground}
+                  github={userMetaData.browsingUser?.github}
+                />
+              }
+            />
+            <Route path="/profile/chats" element={<ProfileChats />}/>
           </Routes>
         </main>
         {authModal === "login" ? (
@@ -197,9 +257,7 @@ function App() {
           </StyledFetchModal>
         )}
         {isLoading && error !== "" && !fetchSuccess && (
-          <StyledFetchModal className="failed">
-            {error}
-          </StyledFetchModal>
+          <StyledFetchModal className="failed">{error}</StyledFetchModal>
         )}
       </globalContext.Provider>
     </BrowserRouter>

@@ -18,9 +18,11 @@ export const globalContext = React.createContext({
     rooms: [],
     github: '',
     socketId: '',
+    browsingUser: null,
     login: (token, userId, nickname, email, bio, role, stacks, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, github, socketId, tokenExpiration) => {},
     logout: () => {},
     setNickname: (nickname) => {},
     updateUser: (bio, role, stacks, nickname, avatarIcon, avatarIconColor, avatarBackground, notifications, rooms, github, socketId) => {},
     updateNotifications: (notifications) => {},
+    setBrowsingUser: (userData) => {},
 })

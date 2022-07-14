@@ -450,7 +450,7 @@ const stackOptions = [
   { value: "Golang", label: "Golang" },
   { value: "Kotlin", label: "Kotlin" },
   { value: "Scala", label: "Scala" },
-  { value: "Ruby", label: "Ruby" },
+  { value: "Ruby on Rails", label: "Ruby on Rails" },
   { value: "Swift", label: "Swift" },
   { value: "Perl", label: "Perl" },
   { value: "Objective-C", label: "Objective-C" },

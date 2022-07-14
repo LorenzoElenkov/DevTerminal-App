@@ -11,6 +11,7 @@ import Select from "react-select";
 
 import { avatarIcons } from "../../EditMyProfile/EditMyProfile";
 import ApplyProject from "../../ApplyProject/ApplyProject";
+import { Link } from "react-router-dom";
 
 const options = [
   { value: -1, label: "Newest" },
@@ -234,9 +235,13 @@ const SearchPage: React.FC<IProps> = (props) => {
                     author {
                       _id
                       nickname
+                      role
+                      bio
+                      skills
                       avatarIcon
                       avatarIconColor
                       avatarBackground
+                      github
                     }
                     applicantsCount
                     members {
@@ -268,34 +273,34 @@ const SearchPage: React.FC<IProps> = (props) => {
       })
       .then((data) => {
         if (!data.errors) {
-            if (currentPage === 1) {
-              fetch("http://localhost:8000/graphql", {
-                method: "POST",
-                body: JSON.stringify(requestBodyCount),
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${context.token}`,
-                },
+          if (currentPage === 1) {
+            fetch("http://localhost:8000/graphql", {
+              method: "POST",
+              body: JSON.stringify(requestBodyCount),
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${context.token}`,
+              },
+            })
+              .then((res2) => {
+                return res2.json();
               })
-                .then((res2) => {
-                  return res2.json();
-                })
-                .then((data2) => {
-                  setProjectsQueryCount(data2.data.countAllProjects);
-                  setQueryPages(() => {
-                    let array = [];
-                    for (
-                      let i = 1;
-                      i <=
-                      Math.ceil(data2.data.countAllProjects / resultsPerPage);
-                      i++
-                    ) {
-                      array.push(i);
-                    }
-                    return array;
-                  });
+              .then((data2) => {
+                setProjectsQueryCount(data2.data.countAllProjects);
+                setQueryPages(() => {
+                  let array = [];
+                  for (
+                    let i = 1;
+                    i <=
+                    Math.ceil(data2.data.countAllProjects / resultsPerPage);
+                    i++
+                  ) {
+                    array.push(i);
+                  }
+                  return array;
                 });
-            }
+              });
+          }
           props.fetchSuccess(true);
           props.fetchMessage("Results are fetched!");
           setIsLoading(false);
@@ -328,7 +333,6 @@ const SearchPage: React.FC<IProps> = (props) => {
     }
 `,
   };
-
 
   const applyProject = () => {
     props.isLoading(true);
@@ -372,7 +376,9 @@ const SearchPage: React.FC<IProps> = (props) => {
     <StyledContainer>
       <StyledSearchContainer>
         <StyledSearchField>
-          <h3>Search Roles {!isLoading && `(${projectsQueryCount} results)`}</h3>
+          <h3>
+            Search Roles {!isLoading && `(${projectsQueryCount} results)`}
+          </h3>
           <label htmlFor="search" />
           <input
             type="search"
@@ -383,12 +389,19 @@ const SearchPage: React.FC<IProps> = (props) => {
           />
           <button onClick={() => fetchSearchProjects()}>Search</button>
           <label>
-            <input type="checkbox" checked={exactMatch} onChange={() => setExactMatch(!exactMatch)} className="checkboxRegex"/>
+            <input
+              type="checkbox"
+              checked={exactMatch}
+              onChange={() => setExactMatch(!exactMatch)}
+              className="checkboxRegex"
+            />
             <span>Exact match?</span>
           </label>
         </StyledSearchField>
         <StyledSearchResultsContainer>
-          {fetchedProjects?.length === 0 && <span className="noResults">No results found</span>}
+          {fetchedProjects?.length === 0 && (
+            <span className="noResults">No results found</span>
+          )}
           {fetchedProjects?.map((el: any, idx: number) => {
             return (
               <StyledSearchResult
@@ -409,8 +422,13 @@ const SearchPage: React.FC<IProps> = (props) => {
                           className={
                             roleSearch.includes(ele.role) && !ele.taken
                               ? "timezoneBox yourRole"
-                              : (roleSearch.includes(ele.role) && ele.taken) ? 
-                              "timezoneBox taken yourRole" : (!roleSearch.includes(ele.role) && !ele.taken) ? "timezoneBox" : (!roleSearch.includes(ele.role) && ele.taken) && "timezoneBox taken"
+                              : roleSearch.includes(ele.role) && ele.taken
+                              ? "timezoneBox taken yourRole"
+                              : !roleSearch.includes(ele.role) && !ele.taken
+                              ? "timezoneBox"
+                              : !roleSearch.includes(ele.role) &&
+                                ele.taken &&
+                                "timezoneBox taken"
                           }
                         >
                           {ele.role}
@@ -461,25 +479,49 @@ const SearchPage: React.FC<IProps> = (props) => {
                   </div>
                 </div>
                 <span className="divider"></span>
-                <div className="author">
-                  <div className="avatarBackground" />
-                  <img src={avatarIcons[el.author.avatarIcon]} alt="" />
-                  <span className="authorName">
-                    {el.author.nickname === context.nickname
-                      ? "You"
-                      : el.author.nickname}
-                  </span>
-                </div>
+                <Link
+                  to={"/myprofile/" + el.author._id}
+                  className="profile"
+                  onClick={() => {
+                    context.setBrowsingUser({
+                      _id: el.author._id,
+                      stacks: el.author.skills,
+                      bio: el.author.bio,
+                      role: el.author.role,
+                      nickname: el.author.nickname,
+                      avatarIcon: el.author.avatarIcon,
+                      avatarIconColor: el.author.avatarIconColor,
+                      avatarBackground: el.author.avatarBackground,
+                      github: el.author.github,
+                    });
+                  }}
+                >
+                  <div className="author">
+                    <div className="avatarBackground" />
+                    <img src={avatarIcons[el.author.avatarIcon]} alt="" />
+                    <span className="authorName">
+                      {el.author.nickname === context.nickname
+                        ? "You"
+                        : el.author.nickname}
+                    </span>
+                  </div>
+                </Link>
                 <div className="applicants">
                   <img src={applicantsIcon} alt="" />
                   <span className="applicantsNumber">
-                    {el.applicantsCount} <span>{el.applicantsCount > 1 || el.applicantsCount < 1 ? 'applicants' : 'applicant'}</span>
+                    {el.applicantsCount}{" "}
+                    <span>
+                      {el.applicantsCount > 1 || el.applicantsCount < 1
+                        ? "applicants"
+                        : "applicant"}
+                    </span>
                   </span>
                 </div>
                 <div className="members">
                   <img src={membersIcon} alt="" />
                   <span className="membersNumber">
-                    {el.members.length} / {el.roles.length + 1} <span>members</span>
+                    {el.members.length} / {el.roles.length + 1}{" "}
+                    <span>members</span>
                   </span>
                 </div>
                 <button
@@ -1034,7 +1076,9 @@ const SearchPage: React.FC<IProps> = (props) => {
         <ApplyProject
           data={clickedProject}
           close={closeApplicationWindow}
-          apply={(message: string, role: string) => {setApplyProjectID([clickedProject._id, message, role]); }}
+          apply={(message: string, role: string) => {
+            setApplyProjectID([clickedProject._id, message, role]);
+          }}
         />
       )}
     </StyledContainer>
@@ -1145,7 +1189,7 @@ const StyledSearchField = styled.div`
     color: white;
     width: max-content;
     margin-left: 10px;
-    font-family: 'LightFont';
+    font-family: "LightFont";
   }
 `;
 
@@ -1339,6 +1383,10 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     width: 100%;
     border-bottom: 1px solid lightgray;
   }
+  .profile {
+    text-decoration: none;
+    color: black;
+  }
   .author {
     margin-top: 15px;
     display: grid;
@@ -1366,7 +1414,8 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
       font-family: "RegularFont";
     }
   }
-  .applicants, .members {
+  .applicants,
+  .members {
     margin-top: 15px;
     display: flex;
     flex-wrap: nowrap;
@@ -1376,7 +1425,8 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
       width: 40px;
       filter: opacity(0.6);
     }
-    .applicantsNumber, .membersNumber {
+    .applicantsNumber,
+    .membersNumber {
       font-size: 2rem;
       font-family: "RegularFont";
 
@@ -1386,7 +1436,8 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     }
   }
 
-  .applyButton, .viewButton {
+  .applyButton,
+  .viewButton {
     margin-top: 15px;
     margin-left: 10px;
     border: none;
@@ -1400,7 +1451,6 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
     font-size: 1.6rem;
     font-family: "LightFont";
   }
-
 `;
 
 const StyledFilterContainer = styled.div`

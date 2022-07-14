@@ -14,7 +14,7 @@ const StyledBackground = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(5px);
   display: grid;
   justify-content: center;
