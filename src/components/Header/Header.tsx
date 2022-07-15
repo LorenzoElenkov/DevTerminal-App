@@ -141,7 +141,7 @@ IProps) => {
             <StyledButton column="3">Home</StyledButton>
             <StyledButton column="4">Features</StyledButton>
             <StyledButton column="5">Pricing</StyledButton>
-            <StyledButton column="6">F.A.Q.</StyledButton>
+            <StyledButton column="6" onClick={() => navigate("/profile/chats")}>F.A.Q.</StyledButton>
             {context.token === "" ? (
               <>
                 <StyledButton column="9" onClick={() => handleModal("login")}>
