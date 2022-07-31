@@ -12,6 +12,7 @@ import ProjectChat from "../Chats/ProjectChat";
 import KickMemberModal from "../KickMemberModal/KickMemberModal";
 import TransferOwnerModal from "../TransferOwnerModal/TransferOwnerModal";
 import LeaveProjectModal from "../LeaveProjectModal/LeaveProjectModal";
+import { Link } from "react-router-dom";
 const ViewCreatedProject: React.FC<IProps> = (props) => {
   const backdropRef = useRef<any>(null);
 
@@ -43,7 +44,7 @@ const ViewCreatedProject: React.FC<IProps> = (props) => {
   const context = useContext(globalContext);
 
   const fetchOnlineSockets = () => {
-    socket.emit("fetch_room_online_users", projectsData._id);
+    socket.emit("fetch_online_users", { projectId: projectsData._id, type: "project" });
   };
 
   useEffect(() => {
@@ -395,18 +396,36 @@ const ViewCreatedProject: React.FC<IProps> = (props) => {
           </div>
         </div>
         <span className="divider"></span>
-        <div className="author">
-          <div className="avatarBackground" />
-          <img
-            src={avatarIcons[Number(projectsData.author.avatarIcon)]}
-            alt=""
-          />
-          <span className="authorName">
-            {projectsData.author.nickname === context.nickname
-              ? "You"
-              : projectsData.author.nickname}
-          </span>
-        </div>
+        <Link
+          to={"/myprofile/" + projectsData.author._id}
+          className="profile"
+          onClick={() => {
+            context.setBrowsingUser({
+              _id: projectsData.author._id,
+              stacks: projectsData.author.skills,
+              bio: projectsData.author.bio,
+              role: projectsData.author.role,
+              nickname: projectsData.author.nickname,
+              avatarIcon: projectsData.author.avatarIcon,
+              avatarIconColor: projectsData.author.avatarIconColor,
+              avatarBackground: projectsData.author.avatarBackground,
+              github: projectsData.author.github,
+            });
+          }}
+        >
+          <div className="author">
+            <div className="avatarBackground" />
+            <img
+              src={avatarIcons[Number(projectsData.author.avatarIcon)]}
+              alt=""
+            />
+            <span className="authorName">
+              {projectsData.author.nickname === context.nickname
+                ? "You"
+                : projectsData.author.nickname}
+            </span>
+          </div>
+        </Link>
         <div className="applicants">
           <img src={applicantsIcon} alt="" />
           <span className="applicantsNumber">
@@ -447,18 +466,36 @@ const ViewCreatedProject: React.FC<IProps> = (props) => {
                     <h2>{el.role}</h2>
                     <p>{el.message ? el.message : "No message"}</p>
                     <div className="divider" />
-                    <div className="author">
-                      <div className="avatarBackground" />
-                      <img
-                        src={avatarIcons[Number(el.user.avatarIcon)]}
-                        alt=""
-                      />
-                      <span className="authorName">
-                        {el.user.nickname === context.nickname
-                          ? "You"
-                          : el.user.nickname}
-                      </span>
-                    </div>
+                    <Link
+                      to={"/myprofile/" + el.user._id}
+                      className="profile"
+                      onClick={() => {
+                        context.setBrowsingUser({
+                          _id: el.user._id,
+                          stacks: el.user.skills,
+                          bio: el.user.bio,
+                          role: el.user.role,
+                          nickname: el.user.nickname,
+                          avatarIcon: el.user.avatarIcon,
+                          avatarIconColor: el.user.avatarIconColor,
+                          avatarBackground: el.user.avatarBackground,
+                          github: el.user.github,
+                        });
+                      }}
+                    >
+                      <div className="author">
+                        <div className="avatarBackground" />
+                        <img
+                          src={avatarIcons[Number(el.user.avatarIcon)]}
+                          alt=""
+                        />
+                        <span className="authorName">
+                          {el.user.nickname === context.nickname
+                            ? "You"
+                            : el.user.nickname}
+                        </span>
+                      </div>
+                    </Link>
                     {el.currentState === "Pending" ? (
                       <>
                         <ReactSelect
@@ -513,65 +550,83 @@ const ViewCreatedProject: React.FC<IProps> = (props) => {
                 avatarIconColor={el.user.avatarIconColor}
                 avatarBackground={el.user.avatarBackground}
               >
-                <div className="member">
-                  <div className="avatarBackground" />
-                  <img
-                    src={avatarIcons[Number(el.user.avatarIcon)]}
-                    alt=""
-                    className="avatarImg"
-                  />
-                  <span className="memberName">
-                    {el.user.nickname === context.nickname
-                      ? "You"
-                      : el.user.nickname}
-                    {checkOnlineStatus(el.user._id) ? (
-                      <div className="onlineDot" />
-                    ) : (
-                      <div className="offlineDot" />
-                    )}
-                  </span>
-                  <span className="memberRole">{el.role}</span>
-                  {(el.user._id === context.userId ||
-                    projectsData.author._id === context.userId) && (
-                    <button
-                      className="memberOptionsBut"
-                      onClick={() =>
-                        setIsOptions({ state: !isOptions.state, index: idx })
-                      }
+                <Link
+                  to={"/myprofile/" + el.user._id}
+                  className="profile"
+                  onClick={() => {
+                    context.setBrowsingUser({
+                      _id: el.user._id,
+                      stacks: el.user.skills,
+                      bio: el.user.bio,
+                      role: el.user.role,
+                      nickname: el.user.nickname,
+                      avatarIcon: el.user.avatarIcon,
+                      avatarIconColor: el.user.avatarIconColor,
+                      avatarBackground: el.user.avatarBackground,
+                      github: el.user.github,
+                    });
+                  }}
+                >
+                  <div className="member">
+                    <div className="avatarBackground" />
+                    <img
+                      src={avatarIcons[Number(el.user.avatarIcon)]}
+                      alt=""
+                      className="avatarImg"
                     />
-                  )}
-                  {isOptions.state === true && isOptions.index === idx && (
-                    <div className="memberOptions">
-                      {el.user._id === context.userId && (
-                        <button
-                          className="leaveBut"
-                          disabled={el.user._id === projectsData.author._id}
-                          onClick={() => leaveHandler2(true)}
-                        >
-                          Leave
-                        </button>
+                    <span className="memberName">
+                      {el.user.nickname === context.nickname
+                        ? "You"
+                        : el.user.nickname}
+                      {checkOnlineStatus(el.user._id) ? (
+                        <div className="onlineDot" />
+                      ) : (
+                        <div className="offlineDot" />
                       )}
-                      {el.user._id !== context.userId &&
-                        context.userId === projectsData.author._id && (
-                          <>
-                            <button
-                              className="makeOwnerBut"
-                              onClick={() => transferHandler2(el.user, true)}
-                            >
-                              Make owner
-                            </button>
-                            <button
-                              className="kickBut"
-                              // onClick={() => kickHandler(el.user._id)}
-                              onClick={() => kickHandler2(el.user, true)}
-                            >
-                              Kick
-                            </button>
-                          </>
-                        )}
-                    </div>
-                  )}
-                </div>
+                    </span>
+                    <span className="memberRole">{el.role}</span>
+                  </div>
+                </Link>
+                {(el.user._id === context.userId ||
+                  projectsData.author._id === context.userId) && (
+                  <button
+                    className="memberOptionsBut"
+                    onClick={() =>
+                      setIsOptions({ state: !isOptions.state, index: idx })
+                    }
+                  />
+                )}
+                {isOptions.state === true && isOptions.index === idx && (
+                  <div className="memberOptions">
+                    {el.user._id === context.userId && (
+                      <button
+                        className="leaveBut"
+                        disabled={el.user._id === projectsData.author._id}
+                        onClick={() => leaveHandler2(true)}
+                      >
+                        Leave
+                      </button>
+                    )}
+                    {el.user._id !== context.userId &&
+                      context.userId === projectsData.author._id && (
+                        <>
+                          <button
+                            className="makeOwnerBut"
+                            onClick={() => transferHandler2(el.user, true)}
+                          >
+                            Make owner
+                          </button>
+                          <button
+                            className="kickBut"
+                            // onClick={() => kickHandler(el.user._id)}
+                            onClick={() => kickHandler2(el.user, true)}
+                          >
+                            Kick
+                          </button>
+                        </>
+                      )}
+                  </div>
+                )}
               </StyledMembersSingle>
             );
           })}
@@ -693,8 +748,70 @@ interface IMembersProps {
 const StyledMembersSingle = styled.div<IMembersProps>`
   grid-column: 1/3;
   margin-bottom: 5px;
-  display: flex;
+  /* display: flex; */
+  display: grid;
+  grid-template-columns: 1fr max-content;
   position: relative;
+  .profile {
+    text-decoration: none;
+    color: black;
+    width: max-content;
+    padding: 2px 15px 2px 0;
+    &:hover {
+      background-color: #e6e6e6;
+      border-radius: 15px;
+    }
+  }
+  .memberOptionsBut {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    background-image: url(${verticalDots});
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position-y: 50%;
+    width: 16px;
+  }
+
+  .memberOptions {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: calc(100%);
+    width: max-content;
+    height: 100%;
+    padding: 10px 20px;
+    display: flex;
+    gap: 5px;
+    background-color: aliceblue;
+    border: 1px solid lightgray;
+    button {
+      font-size: 1.2rem;
+      padding: 6px 12px;
+      font-family: "LightFont";
+      float: right;
+      background-color: #6564db;
+      border: none;
+      border-radius: 10px;
+      width: max-content;
+      align-self: center;
+      color: white;
+    }
+    button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+    button:disabled:hover:after {
+      content: "Must not be owner of this project before leaving";
+      width: max-content;
+      height: max-content;
+      padding: 3px 6px;
+      top: -20%;
+      left: 50%;
+      position: absolute;
+      background-color: tomato;
+    }
+  }
   .member {
     display: grid;
     grid-template-columns: max-content 1fr max-content;
@@ -779,59 +896,6 @@ const StyledMembersSingle = styled.div<IMembersProps>`
       margin-top: -2.5px;
       font-size: 1.2rem;
     }
-    .memberOptionsBut {
-      background-color: transparent;
-      border: none;
-      border-radius: 10px;
-      grid-column: 3/3;
-      grid-row: 1/3;
-      justify-self: end;
-      background-image: url(${verticalDots});
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-position-y: 50%;
-      width: 16px;
-    }
-
-    .memberOptions {
-      position: absolute;
-      z-index: 5;
-      top: 0;
-      left: calc(100%);
-      width: max-content;
-      height: 100%;
-      padding: 10px 20px;
-      display: flex;
-      gap: 5px;
-      background-color: aliceblue;
-      border: 1px solid lightgray;
-      button {
-        font-size: 1.2rem;
-        padding: 6px 12px;
-        font-family: "LightFont";
-        float: right;
-        background-color: #6564db;
-        border: none;
-        border-radius: 10px;
-        width: max-content;
-        align-self: center;
-        color: white;
-      }
-      button:disabled {
-        background-color: gray;
-        cursor: not-allowed;
-      }
-      button:disabled:hover:after {
-        content: "Must not be owner of this project before leaving";
-        width: max-content;
-        height: max-content;
-        padding: 3px 6px;
-        top: -20%;
-        left: 50%;
-        position: absolute;
-        background-color: tomato;
-      }
-    }
   }
 `;
 
@@ -847,6 +911,16 @@ const StyledApplicantSingle = styled.div<IApplicantProps>`
   grid-template-columns: 3.5fr 1fr;
   row-gap: 10px;
   column-gap: 5px;
+  .profile {
+    text-decoration: none;
+    color: black;
+    width: max-content;
+    padding: 2px 10px 2px 0;
+    &:hover {
+      background-color: #f1f1f1;
+      border-radius: 15px;
+    }
+  }
   .confirm {
     grid-column: 2/2;
     grid-row: 4/5;
@@ -866,7 +940,7 @@ const StyledApplicantSingle = styled.div<IApplicantProps>`
     align-self: center;
   }
   h2 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     grid-column: 1/2;
   }
   p {

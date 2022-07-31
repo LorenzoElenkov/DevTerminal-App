@@ -2,11 +2,12 @@ import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-
 import searchIcon from "../../images/atIcon.png";
 import passIcon from "../../images/passIcon.png";
 
 import { globalContext, socket } from "../../../context/auth-context";
+import { privateChatsContext } from "../../../context/private-chats-context";
+import { SocketAddress } from "net";
 
 const StyledBackground = styled.div`
   position: fixed;
@@ -142,6 +143,7 @@ const StyledContainer = styled.div<IContainer>`
 
 const Login: FC<IProps> = ({ close }: IProps) => {
   const context = useContext(globalContext);
+  const chatsContext = useContext(privateChatsContext);
 
   const containerRef = useRef<any>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -178,6 +180,103 @@ const Login: FC<IProps> = ({ close }: IProps) => {
     }
   };
 
+  const getChatsFn = async (userId: string) => {
+    const fetchDataRaw = await fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify({
+        query: `
+      query {
+        queryPrivateChats(userId:"${userId}") {
+          _id
+          userOneReadUntil {
+            id
+            messageIndex
+          }
+          userTwoReadUntil {
+            id
+            messageIndex
+          }
+          messages {
+            message
+            author {
+              _id
+              nickname
+              avatarIcon
+              avatarIconColor
+              avatarBackground
+            }
+            timestamp
+          }
+          users {
+            _id
+            nickname
+            avatarIcon
+            avatarIconColor
+            avatarBackground
+            github
+            role
+            bio
+            skills
+          }
+        }
+      }
+    `,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const fetchData = await fetchDataRaw.json();
+    if (!fetchData.errors) {
+      console.log(fetchData.data.queryPrivateChats);
+      let modifiedChats: any = [];
+      for (let i of fetchData.data.queryPrivateChats) {
+        let myMessageIndex;
+        let otherMessageIndex;
+        if (i.userOneReadUntil.id === userId) {
+          myMessageIndex = i.userOneReadUntil.messageIndex;
+        } else {
+          otherMessageIndex = i.userOneReadUntil.messageIndex;
+        }
+        if (i.userTwoReadUntil.id === userId) {
+          myMessageIndex = i.userTwoReadUntil.messageIndex;
+        } else {
+          otherMessageIndex = i.userTwoReadUntil.messageIndex;
+        }
+        if (myMessageIndex < otherMessageIndex) {
+          modifiedChats = [i, ...modifiedChats];
+        } else {
+          modifiedChats = [...modifiedChats, i];
+        }
+        chatsContext.populateAllChats(modifiedChats);
+      }
+      //the solution below works but not quite... it will fuck up the order in profilechats
+      // for (let i of fetchData.data.queryPrivateChats) {
+      //   let myMessageIndex;
+      //   let otherMessageIndex;
+
+      //   if (i.userOneReadUntil.id === userId) {
+      //     myMessageIndex = i.userOneReadUntil.messageIndex;
+      //   } else {
+      //     otherMessageIndex = i.userOneReadUntil.messageIndex;
+      //   }
+      //   if (i.userTwoReadUntil.id === userId) {
+      //     myMessageIndex = i.userTwoReadUntil.messageIndex;
+      //   } else {
+      //     otherMessageIndex = i.userTwoReadUntil.messageIndex;
+      //   }
+      //   if (myMessageIndex < otherMessageIndex) {
+      //     chatsContext.populateUnreadChats(i);
+      //   } else {
+      //     chatsContext.populateReadChats(i);
+      //   }
+
+      // }
+    } else {
+      console.log(fetchData.errors);
+    }
+  };
+
   const requestBody = {
     query: `
             query { 
@@ -196,6 +295,9 @@ const Login: FC<IProps> = ({ close }: IProps) => {
                       state
                       read
                       message
+                    }
+                    privateRooms {
+                      id
                     }
                     rooms
                     github
@@ -225,7 +327,15 @@ const Login: FC<IProps> = ({ close }: IProps) => {
           socket.connect();
           socket.on("connect", () => {
             // currently sending online status online on Login.
-            socket.emit("send_online_status", {user: resData.data.login.userId, socketId: socket.id});
+            socket.emit("joinMyRoom", resData.data.login.userId);
+            socket.emit("send_online_status", {
+              user: resData.data.login.userId,
+              socketId: socket.id,
+            });
+            socket.emit(
+              "joinPrivateRoomsOnLogin",
+              resData.data.login.privateRooms
+            );
             context.login(
               resData.data.login.token,
               resData.data.login.userId,
@@ -242,6 +352,7 @@ const Login: FC<IProps> = ({ close }: IProps) => {
               resData.data.login.github,
               socket.id
             );
+            getChatsFn(resData.data.login.userId);
             close("");
             navigate("/profile");
           });
@@ -251,6 +362,10 @@ const Login: FC<IProps> = ({ close }: IProps) => {
         console.log(err);
       });
   };
+
+  useEffect(() => {
+    socket.off("onOtherPrivateRoomJoin");
+  }, []);
 
   return (
     <StyledBackground>

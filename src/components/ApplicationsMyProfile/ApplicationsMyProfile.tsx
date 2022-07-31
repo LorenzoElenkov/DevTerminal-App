@@ -18,6 +18,10 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   const [fetchMessage, setFetchMessage] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  }, []);
+
   const context = useContext(globalContext);
 
   const requestBody = {
@@ -60,7 +64,7 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
             `,
   };
 
-  const fetchCreated = () => {
+  const fetchCreated = (controller: AbortController) => {
     setIsLoading(true);
     props.isLoading(true);
     setError("");
@@ -71,20 +75,18 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
     })
       .then((res) => {
         return res.json();
       })
       .then((data) => {
         if (!data.errors) {
+          console.log(1);
           setFetchSuccess(true);
           props.fetchSuccess(true);
           setFetchMessage("All applications fetched!");
           props.fetchMessage("All applications fetched!");
-          //   const applications = data.data.findUser.appliedProjects.map(
-          //     (x: any) => x.project
-          //   );
-          console.log(data.data);
           setProjectsToPrint(data.data.applications);
           setApplicationsFetched(data.data.applications);
         } else {
@@ -116,7 +118,11 @@ const ApplicationsMyProfile: React.FC<IProps> = (props) => {
   }, [isLoading, fetchSuccess, error]);
 
   useEffect(() => {
-    fetchCreated();
+    let controller = new AbortController();
+    fetchCreated(controller);
+    return () => {
+      controller?.abort();
+    };
   }, []);
 
   const filterApplications = (option: any, results: any[]) => {
@@ -314,9 +320,15 @@ const StyledApplicationResult = styled.div<IPropsApplication>`
   .profile {
     text-decoration: none;
     color: black;
+    padding: 2px 15px 2px 0;
+    margin-top: 15px;
+    width: max-content;
+    &:hover {
+      background-color: #e6e6e6;
+      border-radius: 15px;
+    }
   }
   .author {
-    margin-top: 15px;
     display: grid;
     grid-template-columns: max-content 1fr;
     gap: 5px;

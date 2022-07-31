@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 
 import { globalContext, socket } from "./context/auth-context";
+import { privateChatsContext } from "./context/private-chats-context";
 import SearchPage from "./components/Inside/SearchPage/SearchPage";
 import MyProfile from "./components/MyProfile/MyProfile";
 import Sidebar from "./components/MyProfile/Sidebar";
@@ -25,6 +26,8 @@ function App() {
 
   const [authModal, setAuthModal] = useState("");
   const [submenu, setSubmenu] = useState("");
+
+  const [selectedChatId, setSelectedChatId] = useState<number | undefined>(undefined);
 
   const handleNotifications = (state: boolean) => {
     setNotificationsOpen(state);
@@ -46,6 +49,10 @@ function App() {
     github: "",
     socketId: "",
     browsingUser: null,
+  });
+
+  const [userPrivateChats, setUserPrivateChats] = useState<any>({
+    allChats: [],
   });
 
   const login = (
@@ -98,6 +105,9 @@ function App() {
       rooms: [],
       github: "",
       socketId: "",
+    });
+    setUserPrivateChats({
+      allChats: [],
     });
     setSubmenu("");
   };
@@ -159,6 +169,110 @@ function App() {
       };
     });
   };
+
+  const populateAllChats = (chats: any) => {
+    setUserPrivateChats({
+      allChats: chats,
+    });
+  };
+
+
+  const updateChat = (message: any) => {
+
+  };
+
+  useEffect(() => {
+    if (userMetaData.userId) {
+      socket.on("onOtherPrivateRoomJoin", (data) => {
+        socket.emit("otherPrivateRoomJoin", { chatId: data._id });
+        populateAllChats([
+          {
+            _id: data._id,
+            userOneReadUntil: data.userOne,
+            userTwoReadUntil: data.userTwo,
+            users: [
+              data.otherUser,
+              {
+                _id: userMetaData.userId,
+                nickname: userMetaData.nickname,
+                avatarIcon: userMetaData.avatarIcon,
+                avatarIconColor: userMetaData.avatarIconColor,
+                avatarBackground: userMetaData.avatarBackground,
+              },
+            ],
+            messages: data.messages,
+          },
+          ...userPrivateChats.allChats,
+        ]);
+      });
+    }
+
+    socket.on("sendPrivateMessage", (data) => {
+      let chatToMoveToTop: any;
+      let modifiedChat: any[] = [];
+      modifiedChat = userPrivateChats.allChats.map((x: any, idx: number) => {
+        if (x._id === data.chatId) {
+          let changeMessageIndex: any;
+          if (x.userOneReadUntil.id === data.author._id) {
+            changeMessageIndex = data.myMessageIndex;
+            chatToMoveToTop = {
+              ...x,
+              messages: [
+                {
+                  author: data.author,
+                  message: data.message,
+                  timestamp: data.timestamp,
+                },
+                ...x.messages,
+              ],
+              userOneReadUntil: {
+                ...x.userOneReadUntil,
+                messageIndex: changeMessageIndex,
+              },
+              userTwoReadUntil: {
+                ...x.userTwoReadUntil,
+                messageIndex: x._id === selectedChatId ? x.messages.length + 1 : x.userTwoReadUntil.messageIndex
+              }
+            };
+          } else if (x.userTwoReadUntil.id === data.author._id) {
+            changeMessageIndex = data.myMessageIndex;
+            chatToMoveToTop = {
+              ...x,
+              messages: [
+                {
+                  author: data.author,
+                  message: data.message,
+                  timestamp: data.timestamp,
+                },
+                ...x.messages,
+              ],
+              userOneReadUntil: {
+                ...x.userOneReadUntil,
+                messageIndex: x._id === selectedChatId ? x.messages.length + 1 : x.userOneReadUntil.messageIndex
+              },
+              userTwoReadUntil: {
+                ...x.userTwoReadUntil,
+                messageIndex: changeMessageIndex,
+              },
+            };
+          }
+          return chatToMoveToTop;
+        }
+        return x;
+      });
+
+      modifiedChat = modifiedChat.filter(
+        (x: any) => x._id !== chatToMoveToTop._id
+      );
+      modifiedChat.unshift(chatToMoveToTop);
+      populateAllChats(modifiedChat);
+    });
+    return () => {
+      socket.off("onOtherPrivateRoomJoin");
+      socket.off("sendPrivateMessage");
+    };
+  }, [userPrivateChats]);
+
   return (
     <BrowserRouter>
       <globalContext.Provider
@@ -186,82 +300,95 @@ function App() {
           setBrowsingUser: setBrowsingUser,
         }}
       >
-        <Header
-          loginSignup={setAuthModal}
-          logout={logout}
-          setNotifications={(state) => handleNotifications(state)}
-          notificationsOpen={notificationsOpen}
-          // profileClick={() => setSubmenu("edit_profile")}
-        />
-        <main>
-          {userMetaData.userId !== "" && (
-            <Sidebar subMenu={setSubmenu} submenuHeader={submenu} />
+        <privateChatsContext.Provider
+          value={{
+            allChats: userPrivateChats.allChats,
+            populateAllChats: populateAllChats,
+            updateChats: updateChat,
+          }}
+        >
+          <Header
+            loginSignup={setAuthModal}
+            logout={logout}
+            setNotifications={(state) => handleNotifications(state)}
+            notificationsOpen={notificationsOpen}
+          />
+          <main>
+            {userMetaData.userId !== "" && (
+              <Sidebar subMenu={setSubmenu} submenuHeader={submenu} />
+            )}
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route
+                path="/search"
+                element={
+                  <SearchPage
+                    isLoading={setIsLoading}
+                    fetchMessage={setFetchMessage}
+                    fetchSuccess={setFetchSuccess}
+                    error={setError}
+                  />
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <MyProfile
+                    subMenu={submenu}
+                    isLoading={setIsLoading}
+                    fetchMessage={setFetchMessage}
+                    fetchSuccess={setFetchSuccess}
+                    error={setError}
+                  />
+                }
+              />
+              <Route
+                path="/myprofile/:id"
+                element={
+                  <ProfilePage
+                    _id={userMetaData.browsingUser?._id}
+                    stacks={userMetaData.browsingUser?.stacks}
+                    bio={userMetaData.browsingUser?.bio}
+                    role={userMetaData.browsingUser?.role}
+                    nickname={userMetaData.browsingUser?.nickname}
+                    avatarIcon={userMetaData.browsingUser?.avatarIcon}
+                    avatarIconColor={userMetaData.browsingUser?.avatarIconColor}
+                    avatarBackground={
+                      userMetaData.browsingUser?.avatarBackground
+                    }
+                    github={userMetaData.browsingUser?.github}
+                  />
+                }
+              />
+              <Route path="/profile/chats" element={<ProfileChats selectedChatId={(id: number) => setSelectedChatId(id)} browsingUser={userMetaData.browsingUser}/>} />
+            </Routes>
+          </main>
+          {authModal === "login" ? (
+            <Login close={setAuthModal} />
+          ) : authModal === "signup" ? (
+            <Signup close={setAuthModal} />
+          ) : null}
+          {isLoading && !fetchSuccess && error === "" && (
+            <StyledFetchModal className="loading_small_modal">
+              Working on your request...
+            </StyledFetchModal>
           )}
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/search"
-              element={
-                <SearchPage
-                  isLoading={setIsLoading}
-                  fetchMessage={setFetchMessage}
-                  fetchSuccess={setFetchSuccess}
-                  error={setError}
-                />
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <MyProfile
-                  subMenu={submenu}
-                  isLoading={setIsLoading}
-                  fetchMessage={setFetchMessage}
-                  fetchSuccess={setFetchSuccess}
-                  error={setError}
-                />
-              }
-            />
-            <Route
-              path="/myprofile/:id"
-              element={
-                <ProfilePage
-                  _id={userMetaData.browsingUser?._id}
-                  stacks={userMetaData.browsingUser?.stacks}
-                  bio={userMetaData.browsingUser?.bio}
-                  role={userMetaData.browsingUser?.role}
-                  nickname={userMetaData.browsingUser?.nickname}
-                  avatarIcon={userMetaData.browsingUser?.avatarIcon}
-                  avatarIconColor={userMetaData.browsingUser?.avatarIconColor}
-                  avatarBackground={userMetaData.browsingUser?.avatarBackground}
-                  github={userMetaData.browsingUser?.github}
-                />
-              }
-            />
-            <Route path="/profile/chats" element={<ProfileChats />}/>
-          </Routes>
-        </main>
-        {authModal === "login" ? (
-          <Login close={setAuthModal} />
-        ) : authModal === "signup" ? (
-          <Signup close={setAuthModal} />
-        ) : null}
-        {isLoading && !fetchSuccess && error === "" && (
-          <StyledFetchModal className="loading_small_modal">
-            Working on your request...
-          </StyledFetchModal>
-        )}
-        {isLoading && fetchSuccess && (
-          <StyledFetchModal className="success">
-            {fetchMessage}
-          </StyledFetchModal>
-        )}
-        {isLoading && error !== "" && !fetchSuccess && (
-          <StyledFetchModal className="failed">{error}</StyledFetchModal>
-        )}
+          {isLoading && fetchSuccess && (
+            <StyledFetchModal className="success">
+              {fetchMessage}
+            </StyledFetchModal>
+          )}
+          {isLoading && error !== "" && !fetchSuccess && (
+            <StyledFetchModal className="failed">{error}</StyledFetchModal>
+          )}
+        </privateChatsContext.Provider>
       </globalContext.Provider>
     </BrowserRouter>
   );
+}
+
+interface ChatContext {
+  allChats: any[]
 }
 
 export default App;

@@ -4,7 +4,7 @@ import { isContext } from "vm";
 import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 import githubLogo from "../images/github.png";
 import { globalContext } from "../../context/auth-context";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MyProfilePage: React.FC<IProps> = (props) => {
   const context = useContext(globalContext);
@@ -13,34 +13,53 @@ const MyProfilePage: React.FC<IProps> = (props) => {
     <StyledContainer>
       <div className="topBar">
         <h3>Profile</h3>
-        {props._id === context.userId && <button className="profile--edit-button" onClick={() => navigate("/profile")}>Edit</button>}
+        {props._id === context.userId && (
+          <button
+            className="profile--edit-button"
+            onClick={() => navigate("/profile")}
+          >
+            Edit
+          </button>
+        )}
       </div>
-      <StyledProfileBody avatarBackground={props.avatarBackground} avatarIconColor={props.avatarIconColor}>
+      <StyledProfileBody
+        avatarBackground={props.avatarBackground}
+        avatarIconColor={props.avatarIconColor}
+      >
         <div className="profile--avatar_and_nickname">
           <div className="profile--avatarBackground" />
-          <img className="profile--avatarIcon" alt="This profile avatar icon" src={avatarIcons[props.avatarIcon]}/>
+          <img
+            className="profile--avatarIcon"
+            alt="This profile avatar icon"
+            src={avatarIcons[props.avatarIcon]}
+          />
           <span className="profile--user-nickname">{props.nickname}</span>
           <span className="profile--user-role">{props.role}</span>
-          { props._id !== context.userId && <button className="profile--user-direct-message-button">
-            Send message
-          </button>}
+          {props._id !== context.userId && (
+            <Link
+              to={"/profile/chats"}
+              className="profile--user-direct-message-button"
+            >
+              Send message
+            </Link>
+          )}
         </div>
-        { props.github && <a
-          href={"https://github.com/" + props.github}
-          rel='noreferrer'
-          className="profile--user-github"
-          target='_blank'
-        >
-          <img src={githubLogo} alt="This profile github link"/>
-        </a>}
+        {props.github && (
+          <a
+            href={"https://github.com/" + props.github}
+            rel="noreferrer"
+            className="profile--user-github"
+            target="_blank"
+          >
+            <img src={githubLogo} alt="This profile github link" />
+          </a>
+        )}
         <div className="profile--user-bio">
           <span className="profile--user-bio-title">Biography</span>
-          <span className="profile--user-bio-subtitle">
-            A bit about me
-          </span>
+          <span className="profile--user-bio-subtitle">A bit about me</span>
           <span className="profile--user-bio-text">{props.bio}</span>
         </div>
-        <div className="divider"/>
+        <div className="divider" />
         <div className="profile--user-stacks">
           <span className="profile--user-stacks-title">Tech Stacks</span>
           <span className="profile--user-stacks-subtitle">
@@ -48,7 +67,12 @@ const MyProfilePage: React.FC<IProps> = (props) => {
           </span>
           <div className="profile--user-stacks-container">
             {props.stacks?.map((x: any) => {
-              return <div className="profile--user-stacks-item"><div />{x}</div>
+              return (
+                <div className="profile--user-stacks-item">
+                  <div />
+                  {x}
+                </div>
+              );
             })}
           </div>
         </div>
@@ -107,7 +131,6 @@ const StyledContainer = styled.div`
     font-size: 1.4rem;
     align-self: center;
   }
-
 `;
 
 const StyledProfileBody = styled.div<StyledProps>`
@@ -128,7 +151,7 @@ const StyledProfileBody = styled.div<StyledProps>`
     column-gap: 10px;
 
     .profile--avatarBackground {
-      background-color: ${props => props.avatarBackground};
+      background-color: ${(props) => props.avatarBackground};
       border-radius: 50%;
       width: 60px;
       height: 60px;
@@ -145,7 +168,9 @@ const StyledProfileBody = styled.div<StyledProps>`
       grid-row: 1/3;
       justify-self: center;
       align-self: center;
-      filter: invert(${props => props.avatarIconColor === "#000000" ? 0 : 1});
+      filter: invert(
+        ${(props) => (props.avatarIconColor === "#000000" ? 0 : 1)}
+      );
     }
 
     .profile--user-nickname {
@@ -168,12 +193,13 @@ const StyledProfileBody = styled.div<StyledProps>`
       justify-self: end;
       align-self: center;
       border: none;
-      background-color: #6564DB;
+      background-color: #6564db;
       padding: 7.5px 15px;
       color: white;
       font-size: 1.4rem;
       border-radius: 15px;
       font-family: "LightFont";
+      text-decoration: none;
     }
   }
 
@@ -188,7 +214,8 @@ const StyledProfileBody = styled.div<StyledProps>`
     }
   }
 
-  .profile--user-bio, .profile--user-stacks {
+  .profile--user-bio,
+  .profile--user-stacks {
     grid-column: 1/4;
     display: flex;
     flex-direction: column;
@@ -201,8 +228,8 @@ const StyledProfileBody = styled.div<StyledProps>`
     grid-column: 1/4;
   }
 
-  .profile--user-bio, .profile--user-stacks {
-    
+  .profile--user-bio,
+  .profile--user-stacks {
     span:nth-child(1) {
       font-size: 1.8rem;
     }
@@ -240,8 +267,6 @@ const StyledProfileBody = styled.div<StyledProps>`
       }
     }
   }
-
-
 `;
 
 export default MyProfilePage;

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { globalContext, socket } from "../../context/auth-context";
+import { privateChatsContext } from "../../context/private-chats-context";
 import ApplicationsMyProfile from "../ApplicationsMyProfile/ApplicationsMyProfile";
 import CreateProject from "../CreateProject/CreateProject";
 import EditMyProfile from "../EditMyProfile/EditMyProfile";
@@ -10,6 +11,7 @@ import ProjectsMyProfile from "../ProjectsMyProfile/ProjectsMyProfile";
 
 const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMessage, error }) => {
   const context = useContext(globalContext);
+  const chatsContext = useContext(privateChatsContext);
   const joinRooms = () => {
     socket.emit("roomsJoin", context.rooms);
   }
@@ -19,6 +21,12 @@ const MyProfile: React.FC<IProp> = ({ subMenu, isLoading, fetchSuccess, fetchMes
       joinRooms();
     }
   },[context.token])
+
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  },[]);
+
+
   return (
     <globalContext.Consumer>
       {(context) => {

@@ -13,7 +13,23 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
     chosen: false,
     nickname: "",
     _id: "",
+    avatarIcon: "",
+    avatarIconColor: "",
+    avatarBackground: "",
   });
+
+  useEffect(() => {
+    if (props.dataFromProfile) {
+      setChosenUser({
+        chosen: true,
+        nickname: props.dataFromProfile.nickname,
+        _id: props.dataFromProfile._id,
+        avatarIcon: props.dataFromProfile.avatarIcon,
+        avatarIconColor: props.dataFromProfile.avatarIconColor,
+        avatarBackground: props.dataFromProfile.avatarBackground,
+      })
+    }
+  },[]);
 
   const [inputText, setInputText] = useState<string>("");
 
@@ -23,16 +39,10 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
     }
   };
 
-  const joinChat = (otherUserId: string) => {
-    socket.emit("privateRoomJoin", {
-      user1: context.userId,
-      user2: otherUserId,
-    });
-  };
 
   useEffect(() => {
     socket.on("onPrivateRoomJoined", () => {
-        joinChatRoom();
+      joinChatRoom();
     });
 
     return () => {
@@ -42,10 +52,28 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
 
   const joinRoomBody = {
     query: `
-        query {
-            createPrivateChat(thisUserId: "${context.userId}", targetUserId: "${chosenUser._id}") {
+        mutation {
+          createPrivateChat(thisUserId: "${context.userId}", targetUserId: "${chosenUser._id}") {
+            status
+            chat {
+              _id
+              userOneReadUntil {
+                id
+                messageIndex
+              }
+              userTwoReadUntil {
+                id
+                messageIndex
+              }
+              users {
                 _id
+                nickname
+                avatarIcon
+                avatarIconColor
+                avatarBackground
+              }
             }
+          }
         }
       `,
   };
@@ -63,7 +91,24 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
       })
       .then((data) => {
         if (!data.errors) {
-        //   setSearchResults(data.data.findUserByName);
+          props.triggerRefresh({
+            status: data.data.createPrivateChat.status,
+            chat: {...data.data.createPrivateChat.chat, messages: []},
+          });
+          socket.emit("privateRoomJoin", {
+            chatId: data.data.createPrivateChat.chat._id,
+            otherUser: chosenUser,
+            thisUser: {
+              _id: context.userId,
+              nickname: context.nickname,
+              avatarIcon: context.avatarIcon,
+              avatarIconColor: context.avatarIconColor,
+              avatarBackground: context.avatarBackground,
+            },
+            userOne: data.data.createPrivateChat.chat.userOneReadUntil,
+            userTwo: data.data.createPrivateChat.chat.userTwoReadUntil,
+          });
+          props.close();
         } else {
           console.log(data.errors);
         }
@@ -152,6 +197,9 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
                           chosen: true,
                           nickname: result.nickname,
                           _id: result._id,
+                          avatarIcon: result.avatarIcon,
+                          avatarIconColor: result.avatarIconColor,
+                          avatarBackground: result.avatarBackground,
                         });
                         setInputText("");
                       }}
@@ -177,13 +225,27 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
         <div className="chosenUser">
           {chosenUser.chosen && (
             <span>
-              {chosenUser._id === context.userId ? 'You cannot start conversation with yourself' : `You will start chat with: ${chosenUser.nickname}`}
+              {chosenUser._id === context.userId
+                ? "You cannot start conversation with yourself"
+                : `You will start chat with: ${chosenUser.nickname}`}
             </span>
           )}
         </div>
         <div className="buttons">
-          <button className="discard">Cancel</button>
-          <button className="submit" onClick={() => joinChat(chosenUser._id)} disabled={chosenUser.chosen === false ? true : chosenUser._id !== context.userId ? false : true}>
+          <button className="discard" onClick={() => props.close()}>
+            Cancel
+          </button>
+          <button
+            className="submit"
+            onClick={() => joinChatRoom()}
+            disabled={
+              chosenUser.chosen === false
+                ? true
+                : chosenUser._id !== context.userId
+                ? false
+                : true
+            }
+          >
             Submit
           </button>
         </div>
@@ -194,12 +256,32 @@ const NewChatSearchModal: React.FC<IProps> = (props) => {
 
 interface IProps {
   close(): void;
+  triggerRefresh(state: TriggerRefreshProps): void;
+  dataFromProfile?: any;
+}
+
+interface TriggerRefreshProps {
+  status: string;
+  chat: {
+    _id: string;
+    users: {
+      _id: string;
+      nickname: string;
+      avatarIcon: string;
+      avatarIconColor: string;
+      avatarBackground: string;
+    };
+    messages: [];
+  };
 }
 
 interface ChosenUserProps {
   chosen: boolean;
   nickname: string;
   _id: string;
+  avatarIcon: string;
+  avatarIconColor: string;
+  avatarBackground: string;
 }
 interface ResultProp {
   avatarIconColor: string;
@@ -336,8 +418,8 @@ const StyledChatUserSearch = styled.div`
     }
 
     .submit:disabled {
-        background-color: gray;
-        cursor: not-allowed;
+      background-color: gray;
+      cursor: not-allowed;
     }
   }
 `;

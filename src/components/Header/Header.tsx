@@ -8,18 +8,22 @@ import { globalContext, socket } from "../../context/auth-context";
 import searchIcon from "../images/searchIcon.png";
 import notificationsIcon from "../images/notifications.png";
 import profileIcon from "../images/profile.png";
+import messagesIcon from "../images/messagesIcon.png";
+import { privateChatsContext } from "../../context/private-chats-context";
 
 const Header: React.FC<IProps> = ({
   loginSignup,
   logout,
   notificationsOpen,
   setNotifications,
-}: // profileClick
+}:
 IProps) => {
   const context = useContext(globalContext);
+  const chatsContext = useContext(privateChatsContext);
   const [notificationsArray, setNotificationsArray] = useState<Object[] | null>(
     null
   );
+
 
   const notificationWindowRef = useRef(null);
 
@@ -132,22 +136,38 @@ IProps) => {
     navigate("/");
   };
 
+  const checkUnread = () => {
+    let i: any;
+    let unread = 0;
+    for (i of chatsContext.allChats) {
+      let myMessageIndex;
+      let otherMessageIndex;
+      const users = [i.userOneReadUntil, i.userTwoReadUntil];
+      for (let k of users) {
+        if (k.id === context.userId) {
+          myMessageIndex = k.messageIndex;
+        } else {
+          otherMessageIndex = k.messageIndex;
+        }
+      }
+      myMessageIndex < otherMessageIndex && unread++;
+    }
+    return unread;
+  }
+
   return (
-    <globalContext.Consumer>
-      {(context) => {
-        return (
-          <StyledNav className="nav" img={profileIcon}>
-            <StyledLogo column="2">DevTerminal</StyledLogo>
+          <StyledNav className="nav" profileIcon={profileIcon} chatsIcon={messagesIcon}>
+            <StyledLogo column="2" onClick={() => navigate("/")}>DevTerminal</StyledLogo>
             <StyledButton column="3">Home</StyledButton>
             <StyledButton column="4">Features</StyledButton>
             <StyledButton column="5">Pricing</StyledButton>
-            <StyledButton column="6" onClick={() => navigate("/profile/chats")}>F.A.Q.</StyledButton>
+            <StyledButton column="6">F.A.Q.</StyledButton>
             {context.token === "" ? (
               <>
-                <StyledButton column="9" onClick={() => handleModal("login")}>
+                <StyledButton column="10" onClick={() => handleModal("login")}>
                   Login
                 </StyledButton>
-                <StyledButton column="10" onClick={() => handleModal("signup")}>
+                <StyledButton column="11" onClick={() => handleModal("signup")}>
                   Sign up
                 </StyledButton>
               </>
@@ -203,6 +223,9 @@ IProps) => {
                     </StyledNotificationWindow>
                   )}
                 </StyledButton>
+                <Link to={'/profile/chats'} className="chats">
+                  {checkUnread() > 0 && <span className="chatsUnreadNumber">{checkUnread()}</span>}
+                </Link>
                 <Link
                   to={'/myprofile/' + context.userId}
                   className="profile"
@@ -220,15 +243,12 @@ IProps) => {
                     });
                   }}
                 />
-                <StyledButton column="10" onClick={signOut}>
+                <StyledButton column="11" onClick={signOut}>
                   Sign out
                 </StyledButton>
               </>
             )}
           </StyledNav>
-        );
-      }}
-    </globalContext.Consumer>
   );
 };
 
@@ -239,7 +259,6 @@ interface IProps {
   logout(): void;
   notificationsOpen: boolean;
   setNotifications(state: boolean): void;
-  // profileClick?(): void;
 }
 
 interface IButtonProps {
@@ -259,7 +278,8 @@ interface ILogo {
 }
 
 interface INavProps {
-  img?: string | undefined;
+  profileIcon?: string | undefined;
+  chatsIcon?: string | undefined;
 }
 
 interface INotification {
@@ -330,7 +350,7 @@ const StyledNav = styled.nav<INavProps>`
   height: 48px;
   display: grid;
   grid-template-columns:
-    50px max-content repeat(4, max-content) 1fr repeat(3, max-content)
+    50px max-content repeat(4, max-content) 1fr repeat(4, max-content)
     50px;
   grid-template-rows: max-content;
   align-items: center;
@@ -350,13 +370,35 @@ const StyledNav = styled.nav<INavProps>`
   }
 
   a.profile {
-    background-image: url(${(props) => props.img});
+    background-image: url(${(props) => props.profileIcon});
     background-size: 65%;
     background-repeat: no-repeat;
     background-position: 50%;
     width: 100%;
     height: 100%;
     border-right: none;
+    grid-column: 10/10;
+  }
+  a.chats {
+    background-image: url(${(props) => props.chatsIcon});
+    background-size: 65%;
+    background-repeat: no-repeat;
+    background-position: 50%;
+    width: 100%;
+    height: 100%;
+    border-right: none;
+    grid-column: 9/9;
+    position: relative;
+    .chatsUnreadNumber {
+      background-color: tomato;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      padding: 1px 3px;
+      font-size: 1.2rem;
+      border-radius: 50%;
+      color: white;
+    }
   }
 `;
 
@@ -400,6 +442,8 @@ const StyledSearchBar = styled.div<ISearchProps>`
     top: -1px;
     left: 4px;
   }
+
+  
 `;
 
 const buttonAnimTop = keyframes`
@@ -461,19 +505,19 @@ const StyledButton = styled.button<IButtonProps>`
   grid-column: ${(props) => props.column};
   padding: ${(props) => (props.column > "6" ? "5px 20px" : "5px 15px")};
   background: ${(props) =>
-    props.column !== "10"
+    props.column !== "11"
       ? "transparent"
       : "linear-gradient(45deg, #29FFBF, #6564DB 20%)"};
   background-size: 200%;
   background-position: 300% 100%;
-  color: ${(props) => (props.column === "10" ? "white" : "black")};
+  color: ${(props) => (props.column === "11" ? "white" : "black")};
   border: none;
   border-left: ${(props) => props.column === "3" && "1px solid black"};
-  border-right: ${(props) => props.column === "8" && "1px solid black"};
+  /* border-right: ${(props) => props.column === "10" && "1px solid black"}; */
   letter-spacing: 0.5px;
-  border-radius: ${(props) => (props.column === "10" ? "15px" : "none")};
+  border-radius: ${(props) => (props.column === "11" ? "15px" : "none")};
   font-size: 1.4rem;
-  font-family: ${(props) => (props.column === "10" ? "MainFont" : "LightFont")};
+  font-family: ${(props) => (props.column === "11" ? "MainFont" : "LightFont")};
   transition: background-position 0.2s ease-in-out;
   position: relative;
 

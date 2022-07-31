@@ -118,6 +118,12 @@ const StyledTransferWindow = styled.div<IPropsAvatar>`
     margin-top: 10px;
   }
 
+  button:nth-child(3) {
+    background-color: transparent;
+    border: 1px solid black;
+    color: black;
+  }
+
   button:nth-child(4) {
     background-color: #6564db;
     color: white;

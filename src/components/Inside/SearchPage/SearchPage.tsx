@@ -13,6 +13,7 @@ import { avatarIcons } from "../../EditMyProfile/EditMyProfile";
 import ApplyProject from "../../ApplyProject/ApplyProject";
 import { Link } from "react-router-dom";
 
+
 const options = [
   { value: -1, label: "Newest" },
   { value: 1, label: "Oldest" },
@@ -58,6 +59,10 @@ const SearchPage: React.FC<IProps> = (props) => {
   const isOverflow = (element: any) => {
     return element.scrollHeight > element.clientHeight;
   };
+
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  },[]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -1386,9 +1391,15 @@ export const StyledSearchResult = styled.div<ProjectContainerProps>`
   .profile {
     text-decoration: none;
     color: black;
+    margin-top: 15px;
+    padding: 2px 15px 2px 0;
+    width: max-content;
+    &:hover {
+      background-color: #e6e6e6;
+      border-radius: 15px;
+    }
   }
   .author {
-    margin-top: 15px;
     display: grid;
     grid-template-columns: max-content 1fr;
     gap: 5px;

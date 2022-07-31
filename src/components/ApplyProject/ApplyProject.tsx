@@ -8,6 +8,7 @@ import applicantsIcon from "../images/applicants.png";
 import { globalContext, socket } from "../../context/auth-context";
 import ReactSelect from "react-select";
 import membersIcon from "../images/members.png";
+import { Link } from "react-router-dom";
 
 const ApplyProject: React.FC<IProps> = (props) => {
   const context = useContext(globalContext);
@@ -53,7 +54,10 @@ const ApplyProject: React.FC<IProps> = (props) => {
           <div className="wrapper">
             {props.data.roles.map((ele: any, idxx: number) => {
               return (
-                <span key={idxx} className={ele.taken ? "timezoneBox taken" : "timezoneBox"}>
+                <span
+                  key={idxx}
+                  className={ele.taken ? "timezoneBox taken" : "timezoneBox"}
+                >
                   {ele.role}
                 </span>
               );
@@ -88,15 +92,36 @@ const ApplyProject: React.FC<IProps> = (props) => {
           </div>
         </div>
         <span className="divider"></span>
-        <div className="author">
-          <div className="avatarBackground" />
-          <img src={avatarIcons[Number(props.data.author.avatarIcon)]} alt="" />
-          <span className="authorName">
-            {props.data.author.nickname === context.nickname
-              ? "You"
-              : props.data.author.nickname}
-          </span>
-        </div>
+        <Link
+          to={"/myprofile/" + props.data.author._id}
+          className="profile"
+          onClick={() => {
+            context.setBrowsingUser({
+              _id: props.data.author._id,
+              stacks: props.data.author.skills,
+              bio: props.data.author.bio,
+              role: props.data.author.role,
+              nickname: props.data.author.nickname,
+              avatarIcon: props.data.author.avatarIcon,
+              avatarIconColor: props.data.author.avatarIconColor,
+              avatarBackground: props.data.author.avatarBackground,
+              github: props.data.author.github,
+            });
+          }}
+        >
+          <div className="author">
+            <div className="avatarBackground" />
+            <img
+              src={avatarIcons[Number(props.data.author.avatarIcon)]}
+              alt=""
+            />
+            <span className="authorName">
+              {props.data.author.nickname === context.nickname
+                ? "You"
+                : props.data.author.nickname}
+            </span>
+          </div>
+        </Link>
         <div className="applicants">
           <img src={applicantsIcon} alt="" />
           <span className="applicantsNumber">
@@ -106,7 +131,8 @@ const ApplyProject: React.FC<IProps> = (props) => {
         <div className="members">
           <img src={membersIcon} alt="" />
           <span className="membersNumber">
-            {props.data.members.length} / {props.data.roles.length + 1} <span>members</span>
+            {props.data.members.length} / {props.data.roles.length + 1}{" "}
+            <span>members</span>
           </span>
         </div>
       </StyledSearchResult>
@@ -163,6 +189,10 @@ interface IProps {
       avatarIcon: string;
       avatarIconColor: string;
       avatarBackground: string;
+      bio: string;
+      role: string;
+      skills: string;
+      github: string;
     };
   };
   close(): void;

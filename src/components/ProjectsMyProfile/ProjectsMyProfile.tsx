@@ -13,6 +13,10 @@ import { Link } from "react-router-dom";
 const ProjectsMyProfile: React.FC<IProps> = (props) => {
   const context = useContext(globalContext);
 
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  },[]);
+
   const [projectsToPrint, setProjectsToPrint] = useState<any>([]);
   const [projectsFetched, setProjectsFetched] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,9 +65,13 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       user {
                         _id
                         nickname
+                        role
+                        bio
+                        skills
                         avatarIcon
                         avatarIconColor
                         avatarBackground
+                        github
                       }
                       role
                     }
@@ -72,9 +80,13 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       user {
                         _id
                         nickname
+                        role
+                        bio
+                        skills
                         avatarIcon
                         avatarIconColor
                         avatarBackground
+                        github
                       }
                       role
                     }
@@ -111,9 +123,13 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       user {
                         _id
                         nickname
+                        role
+                        bio
+                        skills
                         avatarIcon
                         avatarIconColor
                         avatarBackground
+                        github
                       }
                       role
                     }
@@ -122,9 +138,13 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
                       user {
                         _id
                         nickname
+                        role
+                        bio
+                        skills
                         avatarIcon
                         avatarIconColor
                         avatarBackground
+                        github
                       }
                       role
                     }
@@ -166,7 +186,7 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
         `,
   };
 
-  const fetchCreated = () => {
+  const fetchCreated = (controller: AbortController) => {
     setIsLoading(true);
     props.isLoading(true);
     setError("");
@@ -177,6 +197,7 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal
     })
       .then((res) => {
         return res.json();
@@ -225,8 +246,12 @@ const ProjectsMyProfile: React.FC<IProps> = (props) => {
   }, [projectsFetched]);
 
   useEffect(() => {
+    let controller = new AbortController();
     if (!clickedProject) {
-      fetchCreated();
+      fetchCreated(controller);
+    }
+    return () => {
+      controller?.abort();
     }
   }, [clickedProject]);
 

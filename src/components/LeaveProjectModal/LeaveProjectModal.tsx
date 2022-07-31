@@ -8,7 +8,8 @@ const LeaveProjectModal: React.FC<IProps> = (props) => {
       <StyledTransferWindow>
         <h3>Are you sure?</h3>
         <span>
-          Do you really want to leave&nbsp;<span>{props.projectName.toUpperCase()}</span>?
+          Do you really want to leave&nbsp;
+          <span>{props.projectName.toUpperCase()}</span>?
         </span>
         <button onClick={() => props.close()}>Discard</button>
         <button onClick={() => props.leaveHandler()}>Confirm</button>
@@ -18,11 +19,10 @@ const LeaveProjectModal: React.FC<IProps> = (props) => {
 };
 
 type IProps = {
-    leaveHandler(): void;
+  leaveHandler(): void;
   close(): void;
   projectName: string;
 };
-
 
 const StyledTransferWindow = styled.div`
   padding: 20px 50px;
@@ -48,7 +48,7 @@ const StyledTransferWindow = styled.div`
     display: flex;
     align-items: center;
     span {
-        font-weight: 900;
+      font-weight: 900;
     }
   }
 
@@ -61,6 +61,12 @@ const StyledTransferWindow = styled.div`
     width: max-content;
     justify-self: end;
     margin-top: 10px;
+  }
+
+  button:nth-child(3) {
+    background-color: transparent;
+    border: 1px solid black;
+    color: black;
   }
 
   button:nth-child(4) {

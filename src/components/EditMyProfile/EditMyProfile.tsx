@@ -33,6 +33,10 @@ const EditMyProfile: React.FC<IProps> = (props) => {
 
   const context = useContext(globalContext);
 
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  },[]);
+
   const requestBody = {
     query: `
             mutation {
@@ -180,7 +184,6 @@ const EditMyProfile: React.FC<IProps> = (props) => {
     setAvatarColor(context.avatarBackground);
   }, []);
 
-  console.log(context);
 
   const changeHandler = (el: any) => {
     let rawData = [];
@@ -278,7 +281,6 @@ const EditMyProfile: React.FC<IProps> = (props) => {
                     className="colorPicker"
                     onChangeComplete={(color, event) => {
                       setAvatarInvert(color.hex);
-                      console.log(color.hex);
                     }}
                     colors={["#fff", "#000"]}
                   />

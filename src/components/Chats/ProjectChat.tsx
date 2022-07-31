@@ -7,6 +7,8 @@ import { avatarIcons } from "../EditMyProfile/EditMyProfile";
 const ProjectChat: React.FC<ProjectChatProps> = (props) => {
   const context = useContext(globalContext);
 
+  const [chosenEmoji, setChosenEmoji] = useState<any>(null);
+
   const [messageText, setMessageText] = useState<string>("");
 
   const chatWindowRef = useRef<any>(null);
@@ -19,7 +21,7 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
         if (type === "avatarIcon") {
           return avatarIcons[props.users[i].user.avatarIcon];
         } else if (type === "avatarIconColor") {
-          if (props.users[i].user.avatarIconColor === '#fff') {
+          if (props.users[i].user.avatarIconColor === "#fff") {
             return 1;
           } else {
             return 0;
@@ -50,8 +52,10 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
 
   const dayDiff = (time: string | number) => {
     const theTime = new Date(Number(time));
-    return `${theTime.toString().split(" ")[2]} ${theTime.toString().split(" ")[1]} ${theTime.toString().split(" ")[3]}`;
-  }
+    return `${theTime.toString().split(" ")[2]} ${
+      theTime.toString().split(" ")[1]
+    } ${theTime.toString().split(" ")[3]}`;
+  };
 
   const requestBody = {
     query: `
@@ -82,8 +86,8 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
                 timestamp
               }
             }
-    `
-  }
+    `,
+  };
 
   const fetchMessagesOnMount = () => {
     fetch("http://localhost:8000/graphql", {
@@ -93,15 +97,15 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
         "Content-Type": "application/json",
       },
     })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      if (!data.errors) {
-        setChatMessages(data.data.fetchProjectMessages);
-      }
-    })
-  }
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        if (!data.errors) {
+          setChatMessages(data.data.fetchProjectMessages);
+        }
+      });
+  };
 
   const submitHandler = (e?: any) => {
     e?.preventDefault();
@@ -167,10 +171,10 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
   }, [chatMessages]);
 
   const onEnterHandler = (e: any) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       submitHandler();
     }
-  }
+  };
 
   const checkIfMember = (userId: string) => {
     for (let i in props.users) {
@@ -182,8 +186,7 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
         }
       }
     }
-  }
-
+  };
 
   return (
     <StyledChatContainer>
@@ -193,40 +196,70 @@ const ProjectChat: React.FC<ProjectChatProps> = (props) => {
           chatMessages.map((el: any, idx: number) => {
             return (
               <>
-              <StyledMessageSingle
-              key={idx}
-                avatarBackground={el.author.avatarBackground}
-                avatarIconColor={el.author.avatarIconColor}
-                isMessageMine={el.author._id === context.userId}
-                isMember={checkIfMember(el.author._id)}
-              >
-                {el.author._id !== context.userId && (
-                  <div className="userBackground">
-                    <img
-                      alt=""
-                      src={avatarIcons[el.author.avatarIcon]}
-                      className="avatarIcon"
-                    />
+                <StyledMessageSingle
+                  key={idx}
+                  avatarBackground={el.author.avatarBackground}
+                  avatarIconColor={el.author.avatarIconColor}
+                  isMessageMine={el.author._id === context.userId}
+                  isMember={checkIfMember(el.author._id)}
+                >
+                  {el.author._id !== context.userId && (
+                    <div
+                      className="userBackground"
+                      key={`userBackground ${idx}`}
+                    >
+                      <img
+                        alt=""
+                        src={avatarIcons[el.author.avatarIcon]}
+                        className="avatarIcon"
+                        key={`userIcon ${idx}`}
+                      />
+                    </div>
+                  )}
+                  <div
+                    className={
+                      el.author._id === context.userId
+                        ? "newMessage mine"
+                        : "newMessage"
+                    }
+                    key={`userMessage ${idx}`}
+                  >
+                    {el.message}
                   </div>
+                  <span
+                    className={
+                      el.author._id === context.userId
+                        ? "timestampMine"
+                        : "timestamp"
+                    }
+                    key={`userTimestamp ${idx}`}
+                  >
+                    {timeDiff(el.timestamp)}
+                  </span>
+                </StyledMessageSingle>
+                {idx + 1 < chatMessages.length &&
+                dayDiff(el.timestamp) !==
+                  dayDiff(chatMessages[idx + 1].timestamp) ? (
+                  <div className="dayDivider" key={"divider" + idx}>
+                    <span className="crossline" key={`crosslineleft ${idx}`} />
+                    {dayDiff(el.timestamp)}
+                    <span className="crossline" key={`crosslineright ${idx}`} />
+                  </div>
+                ) : (
+                  idx + 1 === chatMessages.length && (
+                    <div className="dayDivider" key={"divider" + idx}>
+                      <span
+                        className="crossline"
+                        key={`crosslineleft ${idx}`}
+                      />
+                      {dayDiff(el.timestamp)}
+                      <span
+                        className="crossline"
+                        key={`crosslineright ${idx}`}
+                      />
+                    </div>
+                  )
                 )}
-                <div
-                  className={
-                    el.author._id === context.userId
-                      ? "newMessage mine"
-                      : "newMessage"
-                  }
-                >
-                  {el.message}
-                </div>
-                <span
-                  className={
-                    el.author._id === context.userId ? "timestampMine" : "timestamp"
-                  }
-                >
-                  {timeDiff(el.timestamp)}
-                </span>
-              </StyledMessageSingle>
-              {(idx + 1 < chatMessages.length) && (dayDiff(el.timestamp) !== dayDiff(chatMessages[idx + 1].timestamp)) ? <div className="dayDivider"><span className="crossline"/>{dayDiff(el.timestamp)}<span className="crossline"/></div> : (idx + 1 === chatMessages.length) && <div className="dayDivider"><span className="crossline"/>{dayDiff(el.timestamp)}<span className="crossline"/></div>}
               </>
             );
           })}
@@ -267,10 +300,11 @@ const StyledMessageSingle = styled.div<MessageSingleProps>`
   align-self: ${(props) => (props.isMessageMine ? "flex-end" : "flex-start")};
   display: grid;
   grid-template-rows: max-content 1fr max-content;
-  opacity: ${props => props.isMember ? 1 : 0.5};
+  opacity: ${(props) => (props.isMember ? 1 : 1)};
   position: relative;
+  cursor: auto;
   &:hover::after {
-    content: 'This message belongs to someone who is not part of this project anymore';
+    content: "This message belongs to someone who is not part of this project anymore";
     position: absolute;
     top: -25%;
     left: 50%;
@@ -278,9 +312,10 @@ const StyledMessageSingle = styled.div<MessageSingleProps>`
     height: max-content;
     padding: 3px 6px;
     background-color: tomato;
-    display: ${props => props.isMember ? 'none' : 'block'};
+    display: ${(props) => (props.isMember ? "none" : "block")};
     color: white;
     font-size: 1.2rem;
+    opacity: 1;
   }
   .newMessage {
     background-color: #e9e9e9;
@@ -289,6 +324,7 @@ const StyledMessageSingle = styled.div<MessageSingleProps>`
     padding: 5px 10px;
     grid-column: 2/2;
     grid-row: 1/1;
+    opacity: ${props => props.isMember ? 1 : 0.5};
   }
 
   .mine {
@@ -305,12 +341,14 @@ const StyledMessageSingle = styled.div<MessageSingleProps>`
     margin-right: 5px;
     background-color: ${(props) => props.avatarBackground};
     border-radius: 50%;
+    opacity: ${(props) => (props.isMember ? 1 : 0.5)};
     .avatarIcon {
       position: absolute;
       top: calc(50% - 11px);
       left: calc(50% - 11px);
       width: 22px;
-      filter: invert(${props => props.avatarIconColor === "#fff" ? 1 : 0});
+      filter: invert(${(props) => (props.avatarIconColor === "#fff" ? 1 : 0)});
+      opacity: ${(props) => (props.isMember ? 1 : 0.5)};
     }
   }
 
@@ -322,6 +360,7 @@ const StyledMessageSingle = styled.div<MessageSingleProps>`
     grid-row: 1/1;
     align-self: center;
     padding-left: 5px;
+    opacity: ${props => props.isMember ? 1 : 0.5};
   }
 
   .timestampMine {

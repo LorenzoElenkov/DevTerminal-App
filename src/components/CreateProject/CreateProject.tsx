@@ -24,7 +24,9 @@ const CreateProject: React.FC<IProps> = (props) => {
   const [error, setError] = useState<String>("");
 
   const context = useContext(globalContext);
-
+  useEffect(() => {
+    context.setBrowsingUser(null);
+  },[]);
   
   const requestBody = {
     query: `
